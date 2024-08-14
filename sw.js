@@ -1,11 +1,10 @@
-// sw.js (Service Worker)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open('road-rover-v1').then((cache) => {
       return cache.addAll([
-        '/',
-        '/index.html',
-        '/manifest.json'
+        '/road-rover/',
+        '/road-rover/index.html',
+        '/road-rover/manifest.json'
       ]);
     })
   );
