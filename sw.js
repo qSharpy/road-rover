@@ -4,7 +4,8 @@ self.addEventListener('install', (event) => {
       return cache.addAll([
         '/road-rover/',
         '/road-rover/index.html',
-        '/road-rover/manifest.json'
+        '/road-rover/manifest.json',
+        '/road-rover/icon.png'
       ]);
     })
   );
