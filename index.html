@@ -6,6 +6,11 @@
     <title>Road Rover PWA</title>
     <link rel="manifest" href="/road-rover/manifest.json">
     <link rel="icon" type="image/png" href="/road-rover/icon.png">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        #map { height: 400px; width: 100%; }
+    </style>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/road-rover/sw.js', {scope: '/road-rover/'});
@@ -14,6 +19,7 @@
 </head>
 <body>
 <h1>Welcome to Road Rover</h1>
-<p>This is a minimal PWA setup.</p>
+<div id="map"></div>
+<script src="/road-rover/app.js"></script>
 </body>
 </html>

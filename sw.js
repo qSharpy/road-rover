@@ -8,7 +8,8 @@ self.addEventListener('install', (event) => {
         SCOPE,
         SCOPE + 'index.html',
         SCOPE + 'manifest.json',
-        SCOPE + 'icon.png'
+        SCOPE + 'icon.png',
+        SCOPE + 'app.js'
       ]);
     })
   );
