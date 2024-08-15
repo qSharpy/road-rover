@@ -1,7 +1,8 @@
 {
   "name": "Road Rover",
   "short_name": "RoadRover",
-  "start_url": "/road-rover/index.html",
+  "start_url": "/road-rover/",
+  "scope": "/road-rover/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",

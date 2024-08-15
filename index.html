@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="/road-rover/icon.png">
     <title>Road Rover PWA</title>
     <link rel="manifest" href="/road-rover/manifest.json">
+    <link rel="icon" type="image/png" href="/road-rover/icon.png">
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/road-rover/sw.js');
+            navigator.serviceWorker.register('/road-rover/sw.js', {scope: '/road-rover/'});
         }
     </script>
 </head>
