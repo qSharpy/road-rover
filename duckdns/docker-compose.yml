@@ -7,3 +7,4 @@ services:
       #- SUBDOMAINS=subdomain1,subdomain2
       - TOKEN=${DUCKDNS_TOKEN}
     restart: unless-stopped
+
