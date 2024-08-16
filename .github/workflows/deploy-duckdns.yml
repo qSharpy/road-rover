@@ -1,0 +1,23 @@
+name: Deploy DuckDS
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'duckdns/**'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Replace token in docker-compose file
+        run: |
+          sed -i 's/\${DUCKDNS_TOKEN}/'${{ secrets.DUCKDNS_TOKEN }}'/g' ./duckdns/docker-compose.yml
+
+      - name: Deploy DuckDNS
+        working-directory: ./duckdns
+        run: |
+          docker-compose up -d
