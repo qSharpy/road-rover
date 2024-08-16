@@ -9,7 +9,8 @@ self.addEventListener('install', (event) => {
         SCOPE + 'index.html',
         SCOPE + 'manifest.json',
         SCOPE + 'icon.png',
-        SCOPE + 'app.js'
+        SCOPE + 'app.js',
+        'http://road-rover.duckdns.org:8000/api/roads'
       ]);
     })
   );

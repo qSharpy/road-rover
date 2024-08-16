@@ -27,30 +27,6 @@ function getUserLocation() {
 // Call getUserLocation when the page loads
 getUserLocation();
 
-// Example road data
-const roads = [
-    {
-        name: "Bucharest to Pitesti",
-        condition: "poor",
-        path: [
-            [44.4268, 26.1025], // Bucharest
-            [44.5622, 25.9701], // intermediate point
-            [44.7478, 25.7066], // intermediate point
-            [44.8563, 24.8690]  // Pitesti
-        ]
-    },
-    {
-        name: "Bucharest to Constanta",
-        condition: "good",
-        path: [
-            [44.4268, 26.1025], // Bucharest
-            [44.3628, 26.6178], // intermediate point
-            [44.2642, 27.3348], // intermediate point
-            [44.1733, 28.6383]  // Constanta
-        ]
-    }
-];
-
 // Function to get color based on road condition
 function getConditionColor(condition) {
     switch(condition) {
@@ -61,11 +37,24 @@ function getConditionColor(condition) {
     }
 }
 
-// Display roads on the map
-roads.forEach(road => {
-    L.polyline(road.path, {
-        color: getConditionColor(road.condition),
-        weight: 5,
-        opacity: 0.7
-    }).addTo(map).bindPopup(`Road: ${road.name}<br>Condition: ${road.condition}`);
-});
+// Fetch road data from API and display on map
+async function fetchAndDisplayRoads() {
+    try {
+        const API_URL = 'http://road-rover.duckdns.org:8000/api/roads';
+        const response = await fetch(API_URL);
+        const roads = await response.json();
+
+        roads.forEach(road => {
+            L.polyline(road.path, {
+                color: getConditionColor(road.condition),
+                weight: 5,
+                opacity: 0.7
+            }).addTo(map).bindPopup(`Road: ${road.name}<br>Condition: ${road.condition}`);
+        });
+    } catch (error) {
+        console.error("Error fetching road data:", error);
+    }
+}
+
+// Call the function to fetch and display roads
+fetchAndDisplayRoads();

@@ -1,0 +1,26 @@
+name: Deploy Backend to Raspberry Pi
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'road-rover-backend/**'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and Deploy Docker image
+        run: |
+          cd road-rover-backend
+          docker build -t road-rover-api .
+          docker stop road-rover-api || true
+          docker rm road-rover-api || true
+          docker run -d --name road-rover-api -p 8000:8000 road-rover-api
+
+      - name: Clean up old images
+        run: |
+          docker image prune -f
