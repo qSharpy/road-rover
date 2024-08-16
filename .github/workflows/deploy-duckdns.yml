@@ -20,4 +20,4 @@ jobs:
       - name: Deploy DuckDNS
         working-directory: ./duckdns
         run: |
-          docker-compose up -d
+          docker compose up -d
