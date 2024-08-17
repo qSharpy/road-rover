@@ -7,7 +7,7 @@ from typing import List, Tuple
 app = FastAPI()
 
 # Define version number
-BACKEND_VERSION = "0.53"
+BACKEND_VERSION = "0.54"
 
 # Allow CORS
 app.add_middleware(
@@ -75,11 +75,11 @@ async def detect_pothole(data: List[AccelerometerData]):
 
         # Simple pothole detection logic based on z-axis (up-down) acceleration
         severity = None
-        if abs(z) > 10:
+        if abs(z) > 15:
             severity = "large"
-        elif abs(z) > 7:
+        elif abs(z) > 10:
             severity = "medium"
-        elif abs(z) > 4:
+        elif abs(z) > 5:
             severity = "small"
 
         if severity:
