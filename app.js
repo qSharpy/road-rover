@@ -189,7 +189,17 @@ async function postAccelerometerData() {
         if (data.potholes) {
             data.potholes.forEach(pothole => {
                 console.log(`Pothole detected at ${pothole.coordinates} with severity: ${pothole.severity}`);
-                // You could also display a marker or alert on the map here
+
+                // Display a marker for each detected pothole
+                L.marker(pothole.coordinates, {
+                    icon: L.divIcon({
+                        className: 'pothole-icon',
+                        html: `<div style="background-color: ${getPotholeColor(pothole.severity)}; width: 10px; height: 10px; border-radius: 50%;"></div>`,
+                        iconSize: [10, 10],
+                        iconAnchor: [5, 5]
+                    })
+                }).addTo(map)
+                .bindPopup(`Pothole detected<br>Severity: ${pothole.severity}<br>Coordinates: ${pothole.coordinates}<br>Timestamp: ${pothole.timestamp}`);
             });
         } else {
             console.log(data.message);
