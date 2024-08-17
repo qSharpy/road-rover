@@ -1,5 +1,5 @@
 // Define frontend version
-const FRONTEND_VERSION = "0.53";  // Update this manually with each change
+const FRONTEND_VERSION = "0.54";  // Update this manually with each change
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -119,3 +119,82 @@ function getPotholeColor(severity) {
 // Call the functions to fetch and display roads and potholes
 fetchAndDisplayRoads();
 fetchAndDisplayPotholes();
+
+// Accelerometer data collection
+
+let collecting = false;
+let accelerometerData = [];
+let lastSentTime = Date.now();
+
+const logElement = document.getElementById('log');
+const toggleButton = document.getElementById('toggle-accelerometer');
+
+function handleMotion(event) {
+    const { x, y, z } = event.accelerationIncludingGravity;
+    const timestamp = new Date().toISOString();
+
+    // Collect data
+    accelerometerData.push({
+        timestamp,
+        acceleration: [x, y, z],
+        coordinates: [map.getCenter().lat, map.getCenter().lng]  // Use map's center as the current location
+    });
+
+    // Display data on the screen for debugging
+    logElement.textContent = `
+        Timestamp: ${timestamp}
+        Acceleration X: ${x.toFixed(2)}
+        Acceleration Y: ${y.toFixed(2)}
+        Acceleration Z: ${z.toFixed(2)}
+    `;
+
+    // Send data to the backend every 5 seconds or when significant motion is detected
+    if (Date.now() - lastSentTime > 5000 || Math.abs(z) > 5) {
+        postAccelerometerData();
+        lastSentTime = Date.now();
+        accelerometerData = [];  // Reset data after sending
+    }
+}
+
+toggleButton.addEventListener('click', () => {
+    collecting = !collecting;
+
+    if (collecting) {
+        toggleButton.textContent = 'Stop Accelerometer';
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', handleMotion, true);
+        } else {
+            alert('DeviceMotionEvent is not supported on your device.');
+        }
+    } else {
+        toggleButton.textContent = 'Start Accelerometer';
+        window.removeEventListener('devicemotion', handleMotion, true);
+        logElement.textContent = 'No data yet';
+    }
+});
+
+// Post the accelerometer data to the backend
+
+async function postAccelerometerData() {
+    try {
+        const response = await fetch('https://road-rover.gris.ninja/api/pothole-detection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(accelerometerData)
+        });
+
+        const data = await response.json();
+        if (data.potholes) {
+            data.potholes.forEach(pothole => {
+                console.log(`Pothole detected at ${pothole.coordinates} with severity: ${pothole.severity}`);
+                // You could also display a marker or alert on the map here
+            });
+        } else {
+            console.log(data.message);
+        }
+    } catch (error) {
+        console.error("Error posting accelerometer data:", error);
+    }
+}
