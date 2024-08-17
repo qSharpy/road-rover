@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,7 +7,7 @@ from typing import List, Tuple
 app = FastAPI()
 
 # Define version number
-BACKEND_VERSION = "0.52"  # Update this manually with each change
+BACKEND_VERSION = "0.53"
 
 # Allow CORS
 app.add_middleware(
@@ -16,6 +17,9 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+# Logger setup
+logging.basicConfig(level=logging.INFO)
 
 # Sample road data
 roads = [
@@ -66,13 +70,16 @@ async def detect_pothole(data: List[AccelerometerData]):
     for entry in data:
         x, y, z = entry.acceleration
 
+        # Log the incoming data
+        logging.info(f"Received data: x={x}, y={y}, z={z}, coordinates={entry.coordinates}")
+
         # Simple pothole detection logic based on z-axis (up-down) acceleration
         severity = None
-        if abs(z) > 15:
+        if abs(z) > 10:
             severity = "large"
-        elif abs(z) > 10:
+        elif abs(z) > 7:
             severity = "medium"
-        elif abs(z) > 5:
+        elif abs(z) > 4:
             severity = "small"
 
         if severity:
@@ -83,6 +90,8 @@ async def detect_pothole(data: List[AccelerometerData]):
             })
 
     if potholes:
+        logging.info(f"Potholes detected: {potholes}")
         return {"potholes": potholes}
     else:
+        logging.info("No potholes detected")
         return {"message": "No potholes detected"}
