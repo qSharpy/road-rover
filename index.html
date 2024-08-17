@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <style>
-        #map { height: 400px; width: 100%; }
+        #map { height: 400px; width: 100%; margin-bottom: 20px; }
+        #data pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; margin-top: 10px; }
     </style>
     <script>
         if ('serviceWorker' in navigator) {
@@ -20,6 +21,14 @@
 <body>
 <h1>Welcome to Road Rover</h1>
 <div id="map"></div>
+
+<!-- New Section for Accelerometer Data -->
+<button id="toggle-accelerometer">Start Accelerometer</button>
+<div id="data">
+    <h2>Accelerometer Data:</h2>
+    <pre id="log">No data yet</pre>
+</div>
+
 <script src="/road-rover/app.js"></script>
 </body>
 </html>
