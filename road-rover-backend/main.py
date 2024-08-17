@@ -5,6 +5,9 @@ from typing import List, Tuple
 
 app = FastAPI()
 
+# Define version number
+BACKEND_VERSION = "0.52"  # Update this manually with each change
+
 # Allow CORS
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +54,10 @@ async def root():
 @app.get("/api/roads")
 async def get_roads():
     return roads
+
+@app.get("/api/version")
+async def get_backend_version():
+    return {"version": BACKEND_VERSION}
 
 @app.post("/api/pothole-detection")
 async def detect_pothole(data: List[AccelerometerData]):

@@ -1,3 +1,6 @@
+// Define frontend version
+const FRONTEND_VERSION = "0.52";  // Update this manually with each change
+
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
 
@@ -5,6 +8,31 @@ const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
+
+// Display version numbers
+const versionElement = document.createElement('div');
+versionElement.style.position = 'fixed';
+versionElement.style.bottom = '10px';
+versionElement.style.left = '10px';
+versionElement.style.backgroundColor = 'white';
+versionElement.style.padding = '5px';
+versionElement.style.border = '1px solid black';
+versionElement.innerHTML = `Frontend Version: ${FRONTEND_VERSION}`;
+document.body.appendChild(versionElement);
+
+// Function to fetch and display backend version
+async function displayBackendVersion() {
+    try {
+        const response = await fetch('https://road-rover.gris.ninja/api/version');
+        const data = await response.json();
+        versionElement.innerHTML += `<br>Backend Version: ${data.version}`;
+    } catch (error) {
+        console.error("Error fetching backend version:", error);
+    }
+}
+
+// Call the function to display backend version
+displayBackendVersion();
 
 // Function to get user's location
 function getUserLocation() {
