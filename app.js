@@ -40,7 +40,7 @@ function getConditionColor(condition) {
 // Fetch road data from API and display on map
 async function fetchAndDisplayRoads() {
     try {
-        const API_URL = 'http://road-rover.duckdns.org:3500/api/roads';
+        const API_URL = 'https://road-rover.gris.ninja/api/roads';
         const response = await fetch(API_URL);
         const roads = await response.json();
 
