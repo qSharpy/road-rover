@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Tuple
 
 app = FastAPI()
 
@@ -36,6 +38,12 @@ roads = [
     }
 ]
 
+# Model to receive accelerometer data
+class AccelerometerData(BaseModel):
+    timestamp: str
+    acceleration: Tuple[float, float, float]  # (x, y, z)
+    coordinates: Tuple[float, float]  # (latitude, longitude)
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Road Rover API"}
@@ -43,3 +51,31 @@ async def root():
 @app.get("/api/roads")
 async def get_roads():
     return roads
+
+@app.post("/api/pothole-detection")
+async def detect_pothole(data: List[AccelerometerData]):
+    potholes = []
+
+    for entry in data:
+        x, y, z = entry.acceleration
+
+        # Simple pothole detection logic based on z-axis (up-down) acceleration
+        severity = None
+        if abs(z) > 15:
+            severity = "large"
+        elif abs(z) > 10:
+            severity = "medium"
+        elif abs(z) > 5:
+            severity = "small"
+
+        if severity:
+            potholes.append({
+                "severity": severity,
+                "coordinates": entry.coordinates,
+                "timestamp": entry.timestamp
+            })
+
+    if potholes:
+        return {"potholes": potholes}
+    else:
+        return {"message": "No potholes detected"}
