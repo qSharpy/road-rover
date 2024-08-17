@@ -1,5 +1,5 @@
 // Define frontend version
-const FRONTEND_VERSION = "0.52";  // Update this manually with each change
+const FRONTEND_VERSION = "0.53";  // Update this manually with each change
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -84,84 +84,38 @@ async function fetchAndDisplayRoads() {
     }
 }
 
-// Call the function to fetch and display roads
-fetchAndDisplayRoads();
-
-// Accelerometer data collection
-
-let collecting = false;
-let accelerometerData = [];
-let lastSentTime = Date.now();
-
-const logElement = document.getElementById('log');
-const toggleButton = document.getElementById('toggle-accelerometer');
-
-function handleMotion(event) {
-    const { x, y, z } = event.accelerationIncludingGravity;
-    const timestamp = new Date().toISOString();
-
-    // Collect data
-    accelerometerData.push({
-        timestamp,
-        acceleration: [x, y, z],
-        coordinates: [map.getCenter().lat, map.getCenter().lng]  // Use map's center as the current location
-    });
-
-    // Display data on the screen for debugging
-    logElement.textContent = `
-        Timestamp: ${timestamp}
-        Acceleration X: ${x.toFixed(2)}
-        Acceleration Y: ${y.toFixed(2)}
-        Acceleration Z: ${z.toFixed(2)}
-    `;
-
-    // Send data to the backend every 5 seconds or when significant motion is detected
-    if (Date.now() - lastSentTime > 5000 || Math.abs(z) > 5) {
-        postAccelerometerData();
-        lastSentTime = Date.now();
-        accelerometerData = [];  // Reset data after sending
-    }
-}
-
-toggleButton.addEventListener('click', () => {
-    collecting = !collecting;
-
-    if (collecting) {
-        toggleButton.textContent = 'Stop Accelerometer';
-        if (window.DeviceMotionEvent) {
-            window.addEventListener('devicemotion', handleMotion, true);
-        } else {
-            alert('DeviceMotionEvent is not supported on your device.');
-        }
-    } else {
-        toggleButton.textContent = 'Start Accelerometer';
-        window.removeEventListener('devicemotion', handleMotion, true);
-        logElement.textContent = 'No data yet';
-    }
-});
-
-// Post the accelerometer data to the backend
-
-async function postAccelerometerData() {
+// Fetch pothole data from API and display on map
+async function fetchAndDisplayPotholes() {
     try {
-        const response = await fetch('https://road-rover.gris.ninja/api/pothole-detection', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(accelerometerData)
-        });
-
+        const API_URL = 'https://road-rover.gris.ninja/api/pothole-detection';  // Adjust this URL if needed
+        const response = await fetch(API_URL);
         const data = await response.json();
+
         if (data.potholes) {
             data.potholes.forEach(pothole => {
-                console.log(`Pothole detected at ${pothole.coordinates} with severity: ${pothole.severity}`);
-                // You could also display a marker or alert on the map here
+                L.circleMarker(pothole.coordinates, {
+                    color: getPotholeColor(pothole.severity),
+                    radius: 6,
+                    fillOpacity: 0.8
+                }).addTo(map)
+                  .bindPopup(`Pothole detected<br>Severity: ${pothole.severity}<br>Coordinates: ${pothole.coordinates}<br>Timestamp: ${pothole.timestamp}`);
             });
-        } else {
-            console.log(data.message);
         }
     } catch (error) {
-        console.error("Error posting accelerometer data:", error);
+        console.error("Error fetching pothole data:", error);
     }
 }
+
+// Get color based on pothole severity
+function getPotholeColor(severity) {
+    switch(severity) {
+        case 'large': return 'red';
+        case 'medium': return 'orange';
+        case 'small': return 'yellow';
+        default: return 'gray';
+    }
+}
+
+// Call the functions to fetch and display roads and potholes
+fetchAndDisplayRoads();
+fetchAndDisplayPotholes();
