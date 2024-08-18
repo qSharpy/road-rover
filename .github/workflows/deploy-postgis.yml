@@ -1,0 +1,24 @@
+name: Deploy postgis
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'postgis/**'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Replace token in docker-compose file
+        run: |
+          sed -i 's/\${POSTGRES_USER}/'${{ secrets.POSTGRES_USER }}'/g' ./postgis/docker-compose.yml
+          sed -i 's/\${POSTGRES_PASSWORD}/'${{ secrets.POSTGRES_PASSWORD }}'/g' ./postgis/docker-compose.yml
+
+      - name: Deploy postgis
+        working-directory: ./postgis
+        run: |
+          docker compose up -d
