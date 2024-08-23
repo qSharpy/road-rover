@@ -16,6 +16,7 @@ jobs:
       - name: Replace token in docker-compose file
         run: |
           sed -i 's/\${GRAFANA_PASSWORD}/'${{ secrets.GRAFANA_PASSWORD }}'/g' ./monitoring/docker-compose.yml
+          sed -i 's/\${POSTGRES_PASSWORD}/'${{ secrets.POSTGRES_PASSWORD }}'/g' ./monitoring/grafana/datasources/datasource.yml
 
       - name: Deploy monitoring
         working-directory: ./monitoring

@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    url: http://192.168.0.135:5432  # Replace with your PostgreSQL server URL and port
+    access: proxy
+    isDefault: true
+    editable: true
+    jsonData:
+      postgresVersion: 15
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    basicAuth: false
+    basicAuthUser: root

@@ -9,7 +9,4 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     volumes:
-      - grafana:/etc/grafana/provisioning/
-
-volumes:
-  grafana:
+      - ./grafana:/etc/grafana/provisioning/
