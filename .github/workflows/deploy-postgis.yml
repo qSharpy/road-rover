@@ -5,6 +5,12 @@ on:
     branches: [ main ]
     paths:
       - 'postgis/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'run'
+        type: environment
+        required: true
 
 jobs:
   deploy:
