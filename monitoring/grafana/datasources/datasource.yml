@@ -3,7 +3,7 @@ apiVersion: 1
 datasources:
   - name: PostgreSQL
     type: postgres
-    url: http://192.168.0.135:5432  # Replace with your PostgreSQL server URL and port
+    url: 192.168.0.135
     access: proxy
     isDefault: true
     editable: true
