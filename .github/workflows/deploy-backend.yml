@@ -19,7 +19,7 @@ jobs:
           docker build -t road-rover-api .
           docker stop road-rover-api || true
           docker rm road-rover-api || true
-          docker run -d --name road-rover-api -p 3500:3500 road-rover-api
+          docker run -d --restart unless-stopped --name road-rover-api -p 3500:3500 road-rover-api
 
       - name: Clean up old images
         run: |

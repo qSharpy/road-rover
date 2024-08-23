@@ -95,4 +95,3 @@ async def detect_pothole(data: List[AccelerometerData]):
     else:
         logging.info("No potholes detected")
         return {"message": "No potholes detected"}
-
