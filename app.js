@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.58-improved-location";
+const FRONTEND_VERSION = "0.59-improved-location";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -19,6 +19,15 @@ versionElement.style.border = '1px solid black';
 versionElement.innerHTML = `Frontend Version: ${FRONTEND_VERSION}`;
 document.body.appendChild(versionElement);
 
+// Add "Re-center" button to the UI
+const reCenterButton = document.createElement('button');
+reCenterButton.style.position = 'fixed';
+reCenterButton.style.bottom = '50px';
+reCenterButton.style.left = '10px';
+reCenterButton.style.padding = '10px';
+reCenterButton.textContent = 'Re-center';
+document.body.appendChild(reCenterButton);
+
 // Function to fetch and display backend version
 async function displayBackendVersion() {
     try {
@@ -32,6 +41,25 @@ async function displayBackendVersion() {
 
 // Call the function to display backend version
 displayBackendVersion();
+
+// Variables to track centering
+let shouldReCenter = true;
+let userHasMovedMap = false;
+
+// Listen for map movements
+map.on('movestart', function() {
+    userHasMovedMap = true;
+});
+
+// Handle the "Re-center" button click
+reCenterButton.addEventListener('click', () => {
+    shouldReCenter = true;  // Enable re-centering
+    userHasMovedMap = false;  // Reset user movement tracking
+    if (gpsBuffer.length > 0) {
+        const lastLocation = gpsBuffer[gpsBuffer.length - 1];
+        map.setView(lastLocation, 13);  // Re-center on the last known location
+    }
+});
 
 // GPS Buffer to store recent coordinates
 let gpsBuffer = [];  // Buffer for GPS coordinates
@@ -56,11 +84,10 @@ navigator.geolocation.watchPosition(function(position) {
     // Use the averaged location
     const averagedLocation = [averageLat, averageLon];
 
-    // Update the map and marker position based on averagedLocation
-    map.setView(averagedLocation, 13);
-    L.marker(averagedLocation).addTo(map)
-        .bindPopup('Averaged location')
-        .openPopup();
+    // Re-center the map if allowed and if the user hasn't moved the map manually
+    if (shouldReCenter && !userHasMovedMap) {
+        map.setView(averagedLocation, 13);
+    }
 
 }, function(error) {
     console.error("Error getting location:", error);
