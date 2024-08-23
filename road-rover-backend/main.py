@@ -7,7 +7,7 @@ from typing import List, Tuple
 app = FastAPI()
 
 # Define version number
-BACKEND_VERSION = "0.55"
+BACKEND_VERSION = "0.56"
 
 # Allow CORS
 app.add_middleware(
@@ -95,3 +95,4 @@ async def detect_pothole(data: List[AccelerometerData]):
     else:
         logging.info("No potholes detected")
         return {"message": "No potholes detected"}
+
