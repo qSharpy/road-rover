@@ -1,5 +1,5 @@
 // Define frontend version
-const FRONTEND_VERSION = "0.54";  // Update this manually with each change
+const FRONTEND_VERSION = "0.55";  // Update this manually with each change
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -65,42 +65,44 @@ function getConditionColor(condition) {
     }
 }
 
-// Fetch road data from API and display on map
-async function fetchAndDisplayRoads() {
-    try {
-        const API_URL = 'https://road-rover.gris.ninja/api/roads';
-        const response = await fetch(API_URL);
-        const roads = await response.json();
-
-        roads.forEach(road => {
-            L.polyline(road.path, {
-                color: getConditionColor(road.condition),
-                weight: 5,
-                opacity: 0.7
-            }).addTo(map).bindPopup(`Road: ${road.name}<br>Condition: ${road.condition}`);
-        });
-    } catch (error) {
-        console.error("Error fetching road data:", error);
-    }
-}
+//// Fetch road data from API and display on map
+//async function fetchAndDisplayRoads() {
+//    try {
+//        const API_URL = 'https://road-rover.gris.ninja/api/roads';
+//        const response = await fetch(API_URL);
+//        const roads = await response.json();
+//
+//        roads.forEach(road => {
+//            L.polyline(road.path, {
+//                color: getConditionColor(road.condition),
+//                weight: 5,
+//                opacity: 0.7
+//            }).addTo(map).bindPopup(`Road: ${road.name}<br>Condition: ${road.condition}`);
+//        });
+//    } catch (error) {
+//        console.error("Error fetching road data:", error);
+//    }
+//}
 
 // Fetch pothole data from API and display on map
 async function fetchAndDisplayPotholes() {
     try {
-        const API_URL = 'https://road-rover.gris.ninja/api/pothole-detection';  // Adjust this URL if needed
+        const API_URL = 'https://road-rover.gris.ninja/api/potholes';
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        if (data.potholes) {
-            data.potholes.forEach(pothole => {
-                L.circleMarker(pothole.coordinates, {
-                    color: getPotholeColor(pothole.severity),
-                    radius: 6,
-                    fillOpacity: 0.8
-                }).addTo(map)
-                  .bindPopup(`Pothole detected<br>Severity: ${pothole.severity}<br>Coordinates: ${pothole.coordinates}<br>Timestamp: ${pothole.timestamp}`);
+        data.forEach(pothole => {
+            const marker = L.marker([pothole.coordinates[1], pothole.coordinates[0]], {
+                icon: L.divIcon({
+                    className: 'pothole-icon',
+                    html: `<div style="background-color: ${getPotholeColor(pothole.severity)}; width: 10px; height: 10px; border-radius: 50%;"></div>`,
+                    iconSize: [10, 10],
+                    iconAnchor: [5, 5]
+                })
             });
-        }
+
+            marker.addTo(map).bindPopup(`Pothole detected<br>Severity: ${pothole.severity}<br>Timestamp: ${pothole.timestamp}`);
+        });
     } catch (error) {
         console.error("Error fetching pothole data:", error);
     }
@@ -117,7 +119,7 @@ function getPotholeColor(severity) {
 }
 
 // Call the functions to fetch and display roads and potholes
-fetchAndDisplayRoads();
+//fetchAndDisplayRoads();
 fetchAndDisplayPotholes();
 
 // Accelerometer data collection
