@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.59-improved-location";
+const FRONTEND_VERSION = "0.60-improved-location-marker";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -46,6 +46,9 @@ displayBackendVersion();
 let shouldReCenter = true;
 let userHasMovedMap = false;
 
+// Marker for averaged location
+let locationMarker = null;
+
 // Listen for map movements
 map.on('movestart', function() {
     userHasMovedMap = true;
@@ -55,9 +58,8 @@ map.on('movestart', function() {
 reCenterButton.addEventListener('click', () => {
     shouldReCenter = true;  // Enable re-centering
     userHasMovedMap = false;  // Reset user movement tracking
-    if (gpsBuffer.length > 0) {
-        const lastLocation = gpsBuffer[gpsBuffer.length - 1];
-        map.setView(lastLocation, 13);  // Re-center on the last known location
+    if (locationMarker) {
+        map.setView(locationMarker.getLatLng(), 13);  // Re-center on the marker's location
     }
 });
 
@@ -83,6 +85,16 @@ navigator.geolocation.watchPosition(function(position) {
 
     // Use the averaged location
     const averagedLocation = [averageLat, averageLon];
+
+    // Update the marker position
+    if (locationMarker) {
+        locationMarker.setLatLng(averagedLocation);
+    } else {
+        // Create the marker if it doesn't exist
+        locationMarker = L.marker(averagedLocation).addTo(map)
+            .bindPopup('Averaged Location')
+            .openPopup();
+    }
 
     // Re-center the map if allowed and if the user hasn't moved the map manually
     if (shouldReCenter && !userHasMovedMap) {
