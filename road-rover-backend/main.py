@@ -35,7 +35,7 @@ async def init_db():
 app = FastAPI()
 
 # Define version number
-BACKEND_VERSION = "0.6"
+BACKEND_VERSION = "0.61"
 
 # Allow CORS
 app.add_middleware(
@@ -74,10 +74,6 @@ async def startup():
 @app.get("/")
 async def root():
     return {"message": "Welcome to the buc Road Rover API"}
-
-@app.get("/api/roads")
-async def get_roads():
-    return roads
 
 @app.get("/api/version")
 async def get_backend_version():
