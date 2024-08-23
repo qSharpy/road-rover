@@ -1,5 +1,4 @@
-// Define frontend version
-const FRONTEND_VERSION = "0.55";  // Update this manually with each change
+const FRONTEND_VERSION = "0.56";  // Update this manually with each change
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -55,35 +54,6 @@ function getUserLocation() {
 // Call getUserLocation when the page loads
 getUserLocation();
 
-// Function to get color based on road condition
-function getConditionColor(condition) {
-    switch(condition) {
-        case 'good': return 'blue';
-        case 'fair': return 'yellow';
-        case 'poor': return 'red';
-        default: return 'gray';
-    }
-}
-
-//// Fetch road data from API and display on map
-//async function fetchAndDisplayRoads() {
-//    try {
-//        const API_URL = 'https://road-rover.gris.ninja/api/roads';
-//        const response = await fetch(API_URL);
-//        const roads = await response.json();
-//
-//        roads.forEach(road => {
-//            L.polyline(road.path, {
-//                color: getConditionColor(road.condition),
-//                weight: 5,
-//                opacity: 0.7
-//            }).addTo(map).bindPopup(`Road: ${road.name}<br>Condition: ${road.condition}`);
-//        });
-//    } catch (error) {
-//        console.error("Error fetching road data:", error);
-//    }
-//}
-
 // Fetch pothole data from API and display on map
 async function fetchAndDisplayPotholes() {
     try {
@@ -118,8 +88,6 @@ function getPotholeColor(severity) {
     }
 }
 
-// Call the functions to fetch and display roads and potholes
-//fetchAndDisplayRoads();
 fetchAndDisplayPotholes();
 
 // Accelerometer data collection
@@ -150,8 +118,8 @@ function handleMotion(event) {
         Acceleration Z: ${z.toFixed(2)}
     `;
 
-    // Send data to the backend every 5 seconds or when significant motion is detected
-    if (Date.now() - lastSentTime > 5000 || Math.abs(z) > 5) {
+    // Send data to the backend when significant motion is detected
+    if (Math.abs(z) > 3) {
         postAccelerometerData();
         lastSentTime = Date.now();
         accelerometerData = [];  // Reset data after sending

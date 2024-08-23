@@ -1,4 +1,4 @@
-const CACHE_NAME = '0.59';  // Increment this version manually
+const CACHE_NAME = '0.60';
 const SCOPE = '/road-rover/';
 
 self.addEventListener('install', (event) => {
@@ -9,8 +9,7 @@ self.addEventListener('install', (event) => {
         SCOPE + 'index.html',
         SCOPE + 'manifest.json',
         SCOPE + 'icon.png',
-        SCOPE + 'app.js',
-        'https://road-rover.gris.ninja/api/roads'
+        SCOPE + 'app.js'
       ]);
     })
   );
