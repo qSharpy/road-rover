@@ -1,0 +1,23 @@
+name: Deploy monitoring
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'monitoring/**'
+
+jobs:
+  deploy:
+    runs-on: raspberrypi-buc
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Replace token in docker-compose file
+        run: |
+          sed -i 's/\${GRAFANA_PASSWORD}/'${{ secrets.GRAFANA_PASSWORD }}'/g' ./monitoring/docker-compose.yml
+
+      - name: Deploy monitoring
+        working-directory: ./monitoring
+        run: |
+          docker compose up -d
