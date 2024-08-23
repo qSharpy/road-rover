@@ -7,7 +7,7 @@ from typing import List, Tuple
 app = FastAPI()
 
 # Define version number
-BACKEND_VERSION = "0.56"
+BACKEND_VERSION = "0.57"
 
 # Allow CORS
 app.add_middleware(
@@ -53,7 +53,7 @@ class AccelerometerData(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Road Rover API"}
+    return {"message": "Welcome to the buc Road Rover API"}
 
 @app.get("/api/roads")
 async def get_roads():
