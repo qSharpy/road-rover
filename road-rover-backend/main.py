@@ -7,10 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, Integer, String, DateTime
 from geoalchemy2 import Geometry
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
+last_detection_time = None
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
@@ -34,7 +35,7 @@ async def init_db():
 app = FastAPI()
 
 # Define version number
-BACKEND_VERSION = "0.59"
+BACKEND_VERSION = "0.6"
 
 # Allow CORS
 app.add_middleware(
@@ -84,6 +85,12 @@ async def get_backend_version():
 
 @app.post("/api/pothole-detection")
 async def detect_pothole(data: List[AccelerometerData], db: AsyncSession = Depends(get_db)):
+    global last_detection_time
+
+    # Define a minimum interval (e.g., 2 seconds) between consecutive inserts
+    min_interval = timedelta(seconds=1)
+    current_time = datetime.utcnow()
+
     potholes = []
 
     for entry in data:
@@ -94,29 +101,28 @@ async def detect_pothole(data: List[AccelerometerData], db: AsyncSession = Depen
 
         # Simple pothole detection logic based on z-axis (up-down) acceleration
         severity = None
-        if abs(z) > 5:
+        if abs(z) > 10:
             severity = "large"
-        elif abs(z) > 4:
+        elif abs(z) > 7:
             severity = "medium"
-        elif abs(z) > 3:
+        elif abs(z) > 5:
             severity = "small"
 
-        if severity:
+        # Only insert if a pothole is detected and enough time has passed since the last detection
+        if severity and (last_detection_time is None or current_time - last_detection_time > min_interval):
             pothole = Pothole(
                 severity=severity,
                 location=f"SRID=4326;POINT({entry.coordinates[1]} {entry.coordinates[0]})"
             )
             db.add(pothole)
             potholes.append(pothole)
-
-    await db.commit()
+            last_detection_time = current_time  # Update the last detection time
 
     if potholes:
         logging.info(f"Potholes detected: {potholes}")
-        return {"potholes": [PotholeResponse(id=p.id, severity=p.severity, timestamp=p.timestamp, coordinates=(entry.coordinates[1], entry.coordinates[0])) for p in potholes]}
-    else:
-        logging.info("No potholes detected")
-        return {"message": "No potholes detected"}
+        await db.commit()
+
+    return {"potholes": [p.severity for p in potholes] if potholes else "No potholes detected"}
 
 @app.get("/api/potholes", response_model=List[PotholeResponse])
 async def get_potholes(db: AsyncSession = Depends(get_db)):
