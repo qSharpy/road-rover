@@ -10,7 +10,7 @@ from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 
 # Define version number
-BACKEND_VERSION = "0.62"
+BACKEND_VERSION = "0.63"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -97,11 +97,11 @@ async def detect_pothole(data: List[AccelerometerData], db: AsyncSession = Depen
 
         # Simple pothole detection logic based on z-axis (up-down) acceleration
         severity = None
-        if abs(z) > 7:
+        if abs(y) > 14:
             severity = "large"
-        elif abs(z) > 5:
+        elif abs(y) > 12:
             severity = "medium"
-        elif abs(z) > 3:
+        elif abs(y) > 10:
             severity = "small"
 
         # Only insert if a pothole is detected and enough time has passed since the last detection

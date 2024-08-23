@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.56";  // Update this manually with each change
+const FRONTEND_VERSION = "0.57";  // Update this manually with each change
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -119,7 +119,7 @@ function handleMotion(event) {
     `;
 
     // Send data to the backend when significant motion is detected
-    if (Math.abs(z) > 3) {
+    if (Math.abs(y) > 10) {
         postAccelerometerData();
         lastSentTime = Date.now();
         accelerometerData = [];  // Reset data after sending
