@@ -4,14 +4,15 @@ services:
   db:
     image: kartoza/postgis:16-3.4--v2024.03.17
     environment:
-      POSTGRES_DB: road_rover
+      POSTGRES_DBNAME: road_rover
       POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
+      POSTGRES_PASS: test
+      POSTGRES_MULTIPLE_EXTENSIONS: postgis
     restart: unless-stopped
     ports:
       - "5432:5432"
     volumes:
-      - road_rover_data:/var/lib/postgresql/data
+      - road_rover_data:/var/lib/postgresql
 
 volumes:
   road_rover_data:
