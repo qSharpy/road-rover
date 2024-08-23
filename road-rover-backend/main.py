@@ -34,7 +34,7 @@ async def init_db():
 app = FastAPI()
 
 # Define version number
-BACKEND_VERSION = "0.58"
+BACKEND_VERSION = "0.59"
 
 # Allow CORS
 app.add_middleware(
@@ -90,15 +90,15 @@ async def detect_pothole(data: List[AccelerometerData], db: AsyncSession = Depen
         x, y, z = entry.acceleration
 
         # Log the incoming data
-        logging.info(f"Received data: x={x}, y={y}, z={z}, coordinates={entry.coordinates}")
+        #logging.info(f"Received data: x={x}, y={y}, z={z}, coordinates={entry.coordinates}")
 
         # Simple pothole detection logic based on z-axis (up-down) acceleration
         severity = None
-        if abs(z) > 15:
+        if abs(z) > 5:
             severity = "large"
-        elif abs(z) > 10:
+        elif abs(z) > 4:
             severity = "medium"
-        elif abs(z) > 5:
+        elif abs(z) > 3:
             severity = "small"
 
         if severity:
