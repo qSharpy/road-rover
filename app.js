@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.57";  // Update this manually with each change
+const FRONTEND_VERSION = "0.58-improved-location";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -33,26 +33,43 @@ async function displayBackendVersion() {
 // Call the function to display backend version
 displayBackendVersion();
 
-// Function to get user's location
-function getUserLocation() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            map.setView([lat, lon], 13);
-            L.marker([lat, lon]).addTo(map)
-                .bindPopup('You are here')
-                .openPopup();
-        }, function(error) {
-            console.error("Error getting location:", error);
-        });
-    } else {
-        console.log("Geolocation is not available in your browser.");
-    }
-}
+// GPS Buffer to store recent coordinates
+let gpsBuffer = [];  // Buffer for GPS coordinates
 
-// Call getUserLocation when the page loads
-getUserLocation();
+// Watch and buffer GPS location
+navigator.geolocation.watchPosition(function(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    // Buffer the latest coordinates
+    gpsBuffer.push([lat, lon]);
+
+    // Limit buffer size to 5 readings (adjust as needed)
+    if (gpsBuffer.length > 5) {
+        gpsBuffer.shift();  // Remove the oldest reading
+    }
+
+    // Calculate the average position
+    const averageLat = gpsBuffer.reduce((sum, coord) => sum + coord[0], 0) / gpsBuffer.length;
+    const averageLon = gpsBuffer.reduce((sum, coord) => sum + coord[1], 0) / gpsBuffer.length;
+
+    // Use the averaged location
+    const averagedLocation = [averageLat, averageLon];
+
+    // Update the map and marker position based on averagedLocation
+    map.setView(averagedLocation, 13);
+    L.marker(averagedLocation).addTo(map)
+        .bindPopup('Averaged location')
+        .openPopup();
+
+}, function(error) {
+    console.error("Error getting location:", error);
+}, {
+    enableHighAccuracy: true,  // Request high accuracy GPS
+    maximumAge: 10000,  // Cache the location for up to 10 seconds
+    timeout: 10000      // Timeout after 10 seconds
+});
+
 
 // Fetch pothole data from API and display on map
 async function fetchAndDisplayPotholes() {
@@ -88,10 +105,10 @@ function getPotholeColor(severity) {
     }
 }
 
+// Call the functions to fetch and display potholes
 fetchAndDisplayPotholes();
 
 // Accelerometer data collection
-
 let collecting = false;
 let accelerometerData = [];
 let lastSentTime = Date.now();
@@ -144,7 +161,6 @@ toggleButton.addEventListener('click', () => {
 });
 
 // Post the accelerometer data to the backend
-
 async function postAccelerometerData() {
     try {
         const response = await fetch('https://road-rover.gris.ninja/api/pothole-detection', {
