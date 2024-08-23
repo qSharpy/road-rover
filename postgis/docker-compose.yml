@@ -5,7 +5,7 @@ services:
     image: kartoza/postgis:16-3.4--v2024.03.17
     environment:
       POSTGRES_DBNAME: road_rover
-      POSTGRES_USER: postgres
+      POSTGRES_USER: root
       POSTGRES_PASS: test
       POSTGRES_MULTIPLE_EXTENSIONS: postgis
     restart: unless-stopped
