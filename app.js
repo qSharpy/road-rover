@@ -1,12 +1,19 @@
-const FRONTEND_VERSION = "0.61-improved-averaged-location";
+const FRONTEND_VERSION = "0.62-night-mode-toggle";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
 
-// Add the OpenStreetMap tiles
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// Define tile layers for day and night modes
+const dayTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+});
+
+const nightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+});
+
+// Add the day tiles as the default
+dayTiles.addTo(map);
 
 // Display version numbers
 const versionElement = document.createElement('div');
@@ -27,6 +34,15 @@ reCenterButton.style.left = '10px';
 reCenterButton.style.padding = '10px';
 reCenterButton.textContent = 'Re-center';
 document.body.appendChild(reCenterButton);
+
+// Add "Toggle Day/Night" button to the UI
+const toggleDayNightButton = document.createElement('button');
+toggleDayNightButton.style.position = 'fixed';
+toggleDayNightButton.style.bottom = '90px';
+toggleDayNightButton.style.left = '10px';
+toggleDayNightButton.style.padding = '10px';
+toggleDayNightButton.textContent = 'Night Mode';
+document.body.appendChild(toggleDayNightButton);
 
 // Function to fetch and display backend version
 async function displayBackendVersion() {
@@ -61,6 +77,21 @@ reCenterButton.addEventListener('click', () => {
     if (locationMarker) {
         map.setView(locationMarker.getLatLng(), 13);  // Re-center on the marker's location
     }
+});
+
+// Handle "Toggle Day/Night" button click
+let isNightMode = false;
+toggleDayNightButton.addEventListener('click', () => {
+    if (isNightMode) {
+        map.removeLayer(nightTiles);
+        map.addLayer(dayTiles);
+        toggleDayNightButton.textContent = 'Night Mode';
+    } else {
+        map.removeLayer(dayTiles);
+        map.addLayer(nightTiles);
+        toggleDayNightButton.textContent = 'Day Mode';
+    }
+    isNightMode = !isNightMode;
 });
 
 // GPS Buffer to store recent coordinates
