@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.65-heatmap";
+const FRONTEND_VERSION = "0.66-heatmap";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -156,8 +156,6 @@ async function fetchAndDisplayPotholes() {
             return [lat, lon, intensity];  // Format for heatmap
         });
 
-        console.log("Heatmap Data:", heatmapData);
-
         // Add heatmap layer to the map
         const heatmapLayer = L.heatLayer(heatmapData, {
             radius: 25,     // Adjust default radius
@@ -168,16 +166,13 @@ async function fetchAndDisplayPotholes() {
                 0.5: 'orange',
                 1.0: 'red'
             }
-        });
+        }).addTo(map);  // This line adds the heatmap to the map
 
-        // Remove any existing heatmap layer if present
+        // Store reference to the current heatmap layer for future updates
         if (window.currentHeatmapLayer) {
             map.removeLayer(window.currentHeatmapLayer);
         }
-
-        // Add new heatmap layer to the map
-        heatmapLayer.addTo(map);
-        window.currentHeatmapLayer = heatmapLayer;  // Store reference to current layer
+        window.currentHeatmapLayer = heatmapLayer;
 
     } catch (error) {
         console.error("Error fetching pothole data:", error);
