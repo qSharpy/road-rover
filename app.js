@@ -158,7 +158,7 @@ async function fetchAndDisplayPotholes() {
 
         // Add heatmap layer to the map
         const heatmapLayer = L.heatLayer(heatmapData, {
-            radius: 25,     // Adjust default radius
+            radius: 15,     // Adjust default radius
             maxZoom: 15,    // Adjust based on map zoom levels
             blur: 15,       // Adjust to change heat distribution
             gradient: {     // Example gradient for severity visualization
