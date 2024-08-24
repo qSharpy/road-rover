@@ -1,4 +1,8 @@
-const FRONTEND_VERSION = "0.68-heatmap";
+const FRONTEND_VERSION = "0.68-bigger-map+buttons";
+
+// Initialize the map container and set its height
+const mapContainer = document.getElementById('map');
+mapContainer.style.height = '80vh';  // Set map height to 80% of viewport height
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -26,23 +30,45 @@ versionElement.style.border = '1px solid black';
 versionElement.innerHTML = `Frontend Version: ${FRONTEND_VERSION}`;
 document.body.appendChild(versionElement);
 
-// Add "Re-center" button to the UI
-const reCenterButton = document.createElement('button');
-reCenterButton.style.position = 'fixed';
-reCenterButton.style.bottom = '50px';
-reCenterButton.style.left = '10px';
-reCenterButton.style.padding = '10px';
-reCenterButton.textContent = 'Re-center';
-document.body.appendChild(reCenterButton);
+// Function to toggle night mode
+let isNightMode = false;
+const nightModeButton = document.createElement('button');
+nightModeButton.style.position = 'absolute';
+nightModeButton.style.bottom = '10px';
+nightModeButton.style.right = '50px';
+nightModeButton.style.padding = '5px 10px';
+nightModeButton.textContent = 'Night Mode';
+nightModeButton.addEventListener('click', () => {
+    if (isNightMode) {
+        map.removeLayer(nightTiles);
+        dayTiles.addTo(map);
+        nightModeButton.textContent = 'Night Mode';
+    } else {
+        map.removeLayer(dayTiles);
+        nightTiles.addTo(map);
+        nightModeButton.textContent = 'Day Mode';
+    }
+    isNightMode = !isNightMode;
+});
 
-// Add "Toggle Day/Night" button to the UI
-const toggleDayNightButton = document.createElement('button');
-toggleDayNightButton.style.position = 'fixed';
-toggleDayNightButton.style.bottom = '90px';
-toggleDayNightButton.style.left = '10px';
-toggleDayNightButton.style.padding = '10px';
-toggleDayNightButton.textContent = 'Night Mode';
-document.body.appendChild(toggleDayNightButton);
+// Add the "Re-center" button to the map
+const reCenterButton = document.createElement('button');
+reCenterButton.style.position = 'absolute';
+reCenterButton.style.bottom = '50px';
+reCenterButton.style.right = '50px';
+reCenterButton.style.padding = '5px 10px';
+reCenterButton.textContent = 'Re-center';
+reCenterButton.addEventListener('click', () => {
+    shouldReCenter = true;
+    userHasMovedMap = false;
+    if (locationMarker) {
+        map.setView(locationMarker.getLatLng(), 13);
+    }
+});
+
+// Append the buttons to the map container
+mapContainer.appendChild(nightModeButton);
+mapContainer.appendChild(reCenterButton);
 
 // Function to fetch and display backend version
 async function displayBackendVersion() {
@@ -68,30 +94,6 @@ let locationMarker = null;
 // Listen for map movements
 map.on('movestart', function() {
     userHasMovedMap = true;
-});
-
-// Handle the "Re-center" button click
-reCenterButton.addEventListener('click', () => {
-    shouldReCenter = true;  // Enable re-centering
-    userHasMovedMap = false;  // Reset user movement tracking
-    if (locationMarker) {
-        map.setView(locationMarker.getLatLng(), 13);  // Re-center on the marker's location
-    }
-});
-
-// Handle "Toggle Day/Night" button click
-let isNightMode = false;
-toggleDayNightButton.addEventListener('click', () => {
-    if (isNightMode) {
-        map.removeLayer(nightTiles);
-        map.addLayer(dayTiles);
-        toggleDayNightButton.textContent = 'Night Mode';
-    } else {
-        map.removeLayer(dayTiles);
-        map.addLayer(nightTiles);
-        toggleDayNightButton.textContent = 'Day Mode';
-    }
-    isNightMode = !isNightMode;
 });
 
 // GPS Buffer to store recent coordinates
