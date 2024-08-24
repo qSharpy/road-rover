@@ -1,8 +1,8 @@
-const FRONTEND_VERSION = "0.69-bigger-map+buttons";
+const FRONTEND_VERSION = "0.70-bigger-map+buttons";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
-mapContainer.style.height = '80vh';  // Set map height to 80% of viewport height
+mapContainer.style.height = '70vh';  // Set map height to 80% of viewport height
 mapContainer.style.position = 'relative';  // Ensure the map container is positioned relative
 
 // Initialize the map
