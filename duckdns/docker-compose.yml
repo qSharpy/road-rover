@@ -1,9 +1,0 @@
----
-services:
-  duckdns:
-    image: lscr.io/linuxserver/duckdns:latest
-    container_name: duckdns
-    environment:
-      - SUBDOMAINS=road-rover
-      - TOKEN=${DUCKDNS_TOKEN}
-    restart: unless-stopped
