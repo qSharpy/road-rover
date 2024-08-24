@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.70-bigger-map+buttons";
+const FRONTEND_VERSION = "0.71-full dark and white mode";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -45,10 +45,30 @@ nightModeButton.addEventListener('click', () => {
     if (isNightMode) {
         map.removeLayer(nightTiles);
         dayTiles.addTo(map);
+        document.body.style.backgroundColor = 'white';
+        document.body.style.color = 'black';
+        versionElement.style.backgroundColor = 'white';
+        versionElement.style.color = 'black';
+        nightModeButton.style.backgroundColor = 'white';
+        nightModeButton.style.color = 'black';
+        reCenterButton.style.backgroundColor = 'white';
+        reCenterButton.style.color = 'black';
+        toggleButton.style.backgroundColor = 'white';
+        toggleButton.style.color = 'black';
         nightModeButton.textContent = 'Night Mode';
     } else {
         map.removeLayer(dayTiles);
         nightTiles.addTo(map);
+        document.body.style.backgroundColor = '#212121';
+        document.body.style.color = 'white';
+        versionElement.style.backgroundColor = '#424242';
+        versionElement.style.color = 'white';
+        nightModeButton.style.backgroundColor = '#424242';
+        nightModeButton.style.color = 'white';
+        reCenterButton.style.backgroundColor = '#424242';
+        reCenterButton.style.color = 'white';
+        toggleButton.style.backgroundColor = '#424242';
+        toggleButton.style.color = 'white';
         nightModeButton.textContent = 'Day Mode';
     }
     isNightMode = !isNightMode;
