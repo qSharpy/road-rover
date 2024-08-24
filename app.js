@@ -1,8 +1,9 @@
-const FRONTEND_VERSION = "0.68-bigger-map+buttons";
+const FRONTEND_VERSION = "0.69-bigger-map+buttons";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
 mapContainer.style.height = '80vh';  // Set map height to 80% of viewport height
+mapContainer.style.position = 'relative';  // Ensure the map container is positioned relative
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -27,6 +28,7 @@ versionElement.style.left = '10px';
 versionElement.style.backgroundColor = 'white';
 versionElement.style.padding = '5px';
 versionElement.style.border = '1px solid black';
+versionElement.style.zIndex = '1000'; // Ensure version text is on top
 versionElement.innerHTML = `Frontend Version: ${FRONTEND_VERSION}`;
 document.body.appendChild(versionElement);
 
@@ -35,8 +37,9 @@ let isNightMode = false;
 const nightModeButton = document.createElement('button');
 nightModeButton.style.position = 'absolute';
 nightModeButton.style.bottom = '10px';
-nightModeButton.style.right = '50px';
+nightModeButton.style.right = '10px';
 nightModeButton.style.padding = '5px 10px';
+nightModeButton.style.zIndex = '1000'; // Ensure the button is on top
 nightModeButton.textContent = 'Night Mode';
 nightModeButton.addEventListener('click', () => {
     if (isNightMode) {
@@ -55,8 +58,9 @@ nightModeButton.addEventListener('click', () => {
 const reCenterButton = document.createElement('button');
 reCenterButton.style.position = 'absolute';
 reCenterButton.style.bottom = '50px';
-reCenterButton.style.right = '50px';
+reCenterButton.style.right = '10px';
 reCenterButton.style.padding = '5px 10px';
+reCenterButton.style.zIndex = '1000'; // Ensure the button is on top
 reCenterButton.textContent = 'Re-center';
 reCenterButton.addEventListener('click', () => {
     shouldReCenter = true;
