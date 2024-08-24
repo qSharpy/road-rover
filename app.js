@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.67-heatmap";
+const FRONTEND_VERSION = "0.68-heatmap";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -160,7 +160,7 @@ async function fetchAndDisplayPotholes() {
         const heatmapLayer = L.heatLayer(heatmapData, {
             radius: 15,     // Adjust default radius
             maxZoom: 15,    // Adjust based on map zoom levels
-            blur: 15,       // Adjust to change heat distribution
+            blur: 10,       // Adjust to change heat distribution
             gradient: {     // Example gradient for severity visualization
                 0.2: 'yellow',
                 0.5: 'orange',
