@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.62-night-mode-toggle";
+const FRONTEND_VERSION = "0.63-night-mode-toggle";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
