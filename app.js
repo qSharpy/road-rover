@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.64-heatmap";
+const FRONTEND_VERSION = "0.65-heatmap";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -149,31 +149,42 @@ async function fetchAndDisplayPotholes() {
 
         // Prepare data for heatmap
         const heatmapData = data.map(pothole => {
-            return [
-                pothole.coordinates[1],  // latitude
-                pothole.coordinates[0],  // longitude
-                pothole.radius           // dynamic radius
-            ];
+            const lat = pothole.coordinates[1];
+            const lon = pothole.coordinates[0];
+            const intensity = pothole.severity === 'large' ? 1 : pothole.severity === 'medium' ? 0.5 : 0.2;
+
+            return [lat, lon, intensity];  // Format for heatmap
         });
+
+        console.log("Heatmap Data:", heatmapData);
 
         // Add heatmap layer to the map
         const heatmapLayer = L.heatLayer(heatmapData, {
-            radius: 25,     // Adjust default radius (ignored due to dynamic radius)
+            radius: 25,     // Adjust default radius
             maxZoom: 15,    // Adjust based on map zoom levels
             blur: 15,       // Adjust to change heat distribution
             gradient: {     // Example gradient for severity visualization
-                0.1: 'yellow',
-                0.4: 'orange',
-                0.7: 'red'
+                0.2: 'yellow',
+                0.5: 'orange',
+                1.0: 'red'
             }
-        }).addTo(map);
+        });
+
+        // Remove any existing heatmap layer if present
+        if (window.currentHeatmapLayer) {
+            map.removeLayer(window.currentHeatmapLayer);
+        }
+
+        // Add new heatmap layer to the map
+        heatmapLayer.addTo(map);
+        window.currentHeatmapLayer = heatmapLayer;  // Store reference to current layer
 
     } catch (error) {
         console.error("Error fetching pothole data:", error);
     }
 }
 
-// Call the functions to fetch and display potholes
+// Call the function to fetch and display potholes
 fetchAndDisplayPotholes();
 
 // Get color based on pothole severity
