@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.63-night-mode-toggle";
+const FRONTEND_VERSION = "0.64-heatmap";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -140,29 +140,41 @@ navigator.geolocation.watchPosition(function(position) {
     timeout: 10000      // Timeout after 10 seconds
 });
 
-// Fetch pothole data from API and display on map
+// Fetch pothole data from API and display on map as heatmap
 async function fetchAndDisplayPotholes() {
     try {
         const API_URL = 'https://road-rover.gris.ninja/api/potholes';
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        data.forEach(pothole => {
-            const marker = L.marker([pothole.coordinates[1], pothole.coordinates[0]], {
-                icon: L.divIcon({
-                    className: 'pothole-icon',
-                    html: `<div style="background-color: ${getPotholeColor(pothole.severity)}; width: 10px; height: 10px; border-radius: 50%;"></div>`,
-                    iconSize: [10, 10],
-                    iconAnchor: [5, 5]
-                })
-            });
-
-            marker.addTo(map).bindPopup(`Pothole detected<br>Severity: ${pothole.severity}<br>Timestamp: ${pothole.timestamp}`);
+        // Prepare data for heatmap
+        const heatmapData = data.map(pothole => {
+            return [
+                pothole.coordinates[1],  // latitude
+                pothole.coordinates[0],  // longitude
+                pothole.radius           // dynamic radius
+            ];
         });
+
+        // Add heatmap layer to the map
+        const heatmapLayer = L.heatLayer(heatmapData, {
+            radius: 25,     // Adjust default radius (ignored due to dynamic radius)
+            maxZoom: 15,    // Adjust based on map zoom levels
+            blur: 15,       // Adjust to change heat distribution
+            gradient: {     // Example gradient for severity visualization
+                0.1: 'yellow',
+                0.4: 'orange',
+                0.7: 'red'
+            }
+        }).addTo(map);
+
     } catch (error) {
         console.error("Error fetching pothole data:", error);
     }
 }
+
+// Call the functions to fetch and display potholes
+fetchAndDisplayPotholes();
 
 // Get color based on pothole severity
 function getPotholeColor(severity) {
@@ -173,9 +185,6 @@ function getPotholeColor(severity) {
         default: return 'gray';
     }
 }
-
-// Call the functions to fetch and display potholes
-fetchAndDisplayPotholes();
 
 // Accelerometer data collection
 let collecting = false;

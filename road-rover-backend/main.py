@@ -10,7 +10,7 @@ from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 
 # Define version number
-BACKEND_VERSION = "0.63"
+BACKEND_VERSION = "0.64-heatmap"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -124,11 +124,29 @@ async def detect_pothole(data: List[AccelerometerData], db: AsyncSession = Depen
 async def get_potholes(db: AsyncSession = Depends(get_db)):
     query = await db.execute("SELECT id, severity, timestamp, ST_AsText(location) FROM potholes")
     results = query.fetchall()
-    return [
-        PotholeResponse(
-            id=row[0],
-            severity=row[1],
-            timestamp=row[2],
-            coordinates=tuple(map(float, row[3].replace('POINT(', '').replace(')', '').split()))
-        ) for row in results
-    ]
+
+    pothole_data = []
+    for row in results:
+        coordinates = tuple(map(float, row[3].replace('POINT(', '').replace(')', '').split()))
+
+        # Calculate proximity to other potholes
+        proximity_query = await db.execute(
+            """
+            SELECT COUNT(*) FROM potholes
+            WHERE ST_DWithin(location, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), 0.001)
+            """, {"lon": coordinates[0], "lat": coordinates[1]}
+        )
+        count = proximity_query.scalar()
+
+        # Adjust radius based on proximity
+        radius = 25 + count * 5  # Example: Base radius of 25, plus 5 units per nearby pothole
+
+        pothole_data.append({
+            "id": row[0],
+            "severity": row[1],
+            "timestamp": row[2],
+            "coordinates": coordinates,
+            "radius": radius  # Adding radius information
+        })
+
+    return pothole_data
