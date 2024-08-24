@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.60-improved-location-marker";
+const FRONTEND_VERSION = "0.61-improved-averaged-location";
 
 // Initialize the map
 const map = L.map('map').setView([44.4268, 26.1025], 7); // Center on Bucharest
@@ -109,7 +109,6 @@ navigator.geolocation.watchPosition(function(position) {
     timeout: 10000      // Timeout after 10 seconds
 });
 
-
 // Fetch pothole data from API and display on map
 async function fetchAndDisplayPotholes() {
     try {
@@ -163,7 +162,7 @@ function handleMotion(event) {
     accelerometerData.push({
         timestamp,
         acceleration: [x, y, z],
-        coordinates: [map.getCenter().lat, map.getCenter().lng]  // Use map's center as the current location
+        coordinates: locationMarker ? [locationMarker.getLatLng().lat, locationMarker.getLatLng().lng] : null  // Use averaged location
     });
 
     // Display data on the screen for debugging
@@ -207,7 +206,7 @@ async function postAccelerometerData() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(accelerometerData)
+            body: JSON.stringify(accelerometerData.filter(data => data.coordinates))
         });
 
         const data = await response.json();
