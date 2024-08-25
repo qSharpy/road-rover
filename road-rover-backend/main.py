@@ -10,7 +10,7 @@ from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 
 # Define version number
-BACKEND_VERSION = "0.64-heatmap"
+BACKEND_VERSION = "0.65-accelerometer-data"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -59,6 +59,7 @@ app.add_middleware(
 
 # Logger setup
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Dependency to get the database session
 async def get_db():
@@ -164,16 +165,23 @@ async def get_potholes(db: AsyncSession = Depends(get_db)):
 
 @app.post("/api/accelerometer-data")
 async def store_accelerometer_data(data: List[AccelerometerData], db: AsyncSession = Depends(get_db)):
-    for entry in data:
-        x, y, z = entry.acceleration
-        lat, lon = entry.coordinates
-        reading = AccelerometerReading(
-            x=x,
-            y=y,
-            z=z,
-            location=f"SRID=4326;POINT({lon} {lat})"
-        )
-        db.add(reading)
-    
-    await db.commit()
-    return {"message": "Data stored successfully"}
+    logger.info(f"Received accelerometer data: {data}")
+    try:
+        for entry in data:
+            x, y, z = entry.acceleration
+            lat, lon = entry.coordinates
+            reading = AccelerometerReading(
+                x=x,
+                y=y,
+                z=z,
+                location=f"SRID=4326;POINT({lon} {lat})"
+            )
+            db.add(reading)
+        
+        await db.commit()
+        logger.info("Accelerometer data stored successfully")
+        return {"message": "Data stored successfully"}
+    except Exception as e:
+        logger.error(f"Error storing accelerometer data: {str(e)}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Error storing accelerometer data")

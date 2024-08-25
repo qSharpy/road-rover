@@ -234,7 +234,7 @@ function handleMotion(event) {
     accelerometerData.push({
         timestamp,
         acceleration: [x, y, z],
-        coordinates: locationMarker ? [locationMarker.getLatLng().lat, locationMarker.getLatLng().lng] : null  // Use averaged location
+        coordinates: locationMarker ? [locationMarker.getLatLng().lat, locationMarker.getLatLng().lng] : null
     });
 
     // Display data on the screen for debugging
@@ -245,11 +245,9 @@ function handleMotion(event) {
         Acceleration Z: ${z.toFixed(2)}
     `;
 
-    // Send data to the backend when significant motion is detected
-    if (Math.abs(y) > 10) {
+    // Send data to the backend when significant motion is detected or after a certain time
+    if (Math.abs(y) > 10 || accelerometerData.length >= 10) {
         postAccelerometerData();
-        lastSentTime = Date.now();
-        accelerometerData = [];  // Reset data after sending
     }
 }
 
@@ -257,59 +255,38 @@ toggleButton.addEventListener('click', () => {
     collecting = !collecting;
 
     if (collecting) {
+        console.log("Starting accelerometer data collection");
         toggleButton.textContent = 'Stop Accelerometer';
         if (window.DeviceMotionEvent) {
             window.addEventListener('devicemotion', handleMotion, true);
         } else {
+            console.error('DeviceMotionEvent is not supported on your device.');
             alert('DeviceMotionEvent is not supported on your device.');
         }
     } else {
+        console.log("Stopping accelerometer data collection");
         toggleButton.textContent = 'Start Accelerometer';
         window.removeEventListener('devicemotion', handleMotion, true);
         logElement.textContent = 'No data yet';
     }
 });
 
-// Post the accelerometer data to the backend
+// Modify the postAccelerometerData function
 async function postAccelerometerData() {
     try {
-        // Send data to pothole detection endpoint
-        const potholeResponse = await fetch('https://road-rover.gris.ninja/api/pothole-detection', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(accelerometerData.filter(data => data.coordinates))
-        });
-
-        const potholeData = await potholeResponse.json();
-        if (potholeData.potholes) {
-            potholeData.potholes.forEach(pothole => {
-                console.log(`Pothole detected at ${pothole.coordinates} with severity: ${pothole.severity}`);
-
-                // Display a marker for each detected pothole
-                L.marker(pothole.coordinates, {
-                    icon: L.divIcon({
-                        className: 'pothole-icon',
-                        html: `<div style="background-color: ${getPotholeColor(pothole.severity)}; width: 10px; height: 10px; border-radius: 50%;"></div>`,
-                        iconSize: [10, 10],
-                        iconAnchor: [5, 5]
-                    })
-                }).addTo(map)
-                .bindPopup(`Pothole detected<br>Severity: ${pothole.severity}<br>Coordinates: ${pothole.coordinates}<br>Timestamp: ${pothole.timestamp}`);
-            });
-        } else {
-            console.log(potholeData.message);
-        }
+        console.log("Sending accelerometer data:", accelerometerData);
 
         // Send data to accelerometer data storage endpoint
-        await fetch('https://road-rover.gris.ninja/api/accelerometer-data', {
+        const response = await fetch('https://road-rover.gris.ninja/api/accelerometer-data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(accelerometerData.filter(data => data.coordinates))
         });
+
+        const result = await response.json();
+        console.log("Accelerometer data response:", result);
 
         accelerometerData = [];  // Reset data after sending
     } catch (error) {
