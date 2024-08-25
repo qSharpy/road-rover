@@ -8,3 +8,16 @@ CREATE TABLE IF NOT EXISTS potholes (
 );
 
 CREATE INDEX idx_pothole_location ON potholes USING GIST (location);
+
+-- New table for accelerometer data
+CREATE TABLE IF NOT EXISTS accelerometer_data (
+    id SERIAL PRIMARY KEY,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    x FLOAT NOT NULL,
+    y FLOAT NOT NULL,
+    z FLOAT NOT NULL,
+    location GEOMETRY(Point, 4326) NOT NULL
+);
+
+CREATE INDEX idx_accelerometer_data_timestamp ON accelerometer_data (timestamp);
+CREATE INDEX idx_accelerometer_data_location ON accelerometer_data USING GIST (location);

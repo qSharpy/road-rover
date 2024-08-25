@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 
@@ -27,6 +27,17 @@ class Pothole(Base):
     id = Column(Integer, primary_key=True, index=True)
     severity = Column(String, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
+    location = Column(Geometry("POINT"))
+
+# Define AccelerometerReading model
+class AccelerometerReading(Base):
+    __tablename__ = "accelerometer_data"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    x = Column(Float)
+    y = Column(Float)
+    z = Column(Float)
     location = Column(Geometry("POINT"))
 
 # Create the database tables
@@ -150,3 +161,19 @@ async def get_potholes(db: AsyncSession = Depends(get_db)):
         })
 
     return pothole_data
+
+@app.post("/api/accelerometer-data")
+async def store_accelerometer_data(data: List[AccelerometerData], db: AsyncSession = Depends(get_db)):
+    for entry in data:
+        x, y, z = entry.acceleration
+        lat, lon = entry.coordinates
+        reading = AccelerometerReading(
+            x=x,
+            y=y,
+            z=z,
+            location=f"SRID=4326;POINT({lon} {lat})"
+        )
+        db.add(reading)
+    
+    await db.commit()
+    return {"message": "Data stored successfully"}
