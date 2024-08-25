@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.72-accelerometer";
+const FRONTEND_VERSION = "0.73-accelerometer";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -222,6 +222,7 @@ function getPotholeColor(severity) {
 let collecting = false;
 let accelerometerData = [];
 let lastSentTime = Date.now();
+let lastClearTime = Date.now();
 
 const logElement = document.getElementById('log');
 const toggleButton = document.getElementById('toggle-accelerometer');
@@ -245,9 +246,24 @@ function handleMotion(event) {
         Acceleration Z: ${z.toFixed(2)}
     `;
 
-    // Send data to the backend when significant motion is detected or after a certain time
-    if (Math.abs(y) > 10 || accelerometerData.length >= 10) {
+    const currentTime = Date.now();
+
+    // Send accelerometer data continuously (e.g., every 5 seconds)
+    if (currentTime - lastSentTime > 5000) {  // 5000 ms = 5 seconds
         postAccelerometerData();
+        lastSentTime = currentTime;
+    }
+
+    // Detect pothole only when significant motion is detected
+    if (Math.abs(y) > 10) {
+        detectPothole();
+    }
+
+    // Clear accelerometer data every 30 seconds
+    if (currentTime - lastClearTime > 30000) {  // 30000 ms = 30 seconds
+        accelerometerData = [];
+        lastClearTime = currentTime;
+        console.log("Cleared accelerometer data");
     }
 }
 
@@ -271,7 +287,6 @@ toggleButton.addEventListener('click', () => {
     }
 });
 
-// Modify the postAccelerometerData function
 async function postAccelerometerData() {
     try {
         console.log("Sending accelerometer data:", accelerometerData);
@@ -282,14 +297,37 @@ async function postAccelerometerData() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(accelerometerData.filter(data => data.coordinates))
+            body: JSON.stringify(accelerometerData)
         });
 
         const result = await response.json();
         console.log("Accelerometer data response:", result);
-
-        accelerometerData = [];  // Reset data after sending
     } catch (error) {
         console.error("Error posting accelerometer data:", error);
+    }
+}
+
+async function detectPothole() {
+    try {
+        console.log("Sending data for pothole detection:", accelerometerData);
+
+        // Send data to pothole detection endpoint
+        const response = await fetch('https://road-rover.gris.ninja/api/pothole-detection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(accelerometerData)
+        });
+
+        const result = await response.json();
+        console.log("Pothole detection response:", result);
+
+        // If potholes were detected, update the map
+        if (result.potholes && result.potholes.length > 0) {
+            fetchAndDisplayPotholes();
+        }
+    } catch (error) {
+        console.error("Error detecting potholes:", error);
     }
 }
