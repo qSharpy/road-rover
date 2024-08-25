@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.71-full dark and white mode";
+const FRONTEND_VERSION = "0.72-accelerometer";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
