@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.73-accelerometer";
+const FRONTEND_VERSION = "0.74-accelerometer";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -248,8 +248,8 @@ function handleMotion(event) {
 
     const currentTime = Date.now();
 
-    // Send accelerometer data continuously (e.g., every 5 seconds)
-    if (currentTime - lastSentTime > 5000) {  // 5000 ms = 5 seconds
+    // Send accelerometer data continuously (e.g., every 1 seconds)
+    if (currentTime - lastSentTime > 1000) {  // 1000 ms = 1 seconds
         postAccelerometerData();
         lastSentTime = currentTime;
     }
@@ -259,8 +259,8 @@ function handleMotion(event) {
         detectPothole();
     }
 
-    // Clear accelerometer data every 30 seconds
-    if (currentTime - lastClearTime > 30000) {  // 30000 ms = 30 seconds
+    // Clear accelerometer data every 10 seconds
+    if (currentTime - lastClearTime > 10000) {  // 10000 ms = 10 seconds
         accelerometerData = [];
         lastClearTime = currentTime;
         console.log("Cleared accelerometer data");
