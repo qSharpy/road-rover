@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.75-improve pothole";
+const FRONTEND_VERSION = "0.76-make ios work";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -268,11 +268,36 @@ toggleButton.addEventListener('click', () => {
     if (collecting) {
         console.log("Starting accelerometer data collection");
         toggleButton.textContent = 'Stop Accelerometer';
-        if (window.DeviceMotionEvent) {
+        
+        // Check if it's an iOS device
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        if (isIOS) {
+            // Request permission for iOS 13+
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('devicemotion', handleMotion, true);
+                        } else {
+                            console.error('Permission to access motion sensors was denied');
+                            alert('Permission to access motion sensors was denied');
+                            collecting = false;
+                            toggleButton.textContent = 'Start Accelerometer';
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Handle older versions of iOS
+                window.addEventListener('devicemotion', handleMotion, true);
+            }
+        } else if (window.DeviceMotionEvent) {
             window.addEventListener('devicemotion', handleMotion, true);
         } else {
             console.error('DeviceMotionEvent is not supported on your device.');
             alert('DeviceMotionEvent is not supported on your device.');
+            collecting = false;
+            toggleButton.textContent = 'Start Accelerometer';
         }
     } else {
         console.log("Stopping accelerometer data collection");
