@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.74-accelerometer";
+const FRONTEND_VERSION = "0.75-improve pothole";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
