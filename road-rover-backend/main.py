@@ -97,7 +97,7 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
     global last_detection_time
     logger.info(f"Received accelerometer data: {data}")
 
-    min_interval = timedelta(seconds=1)
+    min_interval = timedelta(seconds=1.5)
     current_time = datetime.utcnow()
     potholes = []
 
