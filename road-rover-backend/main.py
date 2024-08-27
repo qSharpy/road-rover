@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import math
 
 # Define version number
-BACKEND_VERSION = "0.66-improve pothole"
+BACKEND_VERSION = "0.67-incr. poth. min_interv"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
