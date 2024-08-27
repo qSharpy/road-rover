@@ -29,40 +29,13 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMax": 13,
-            "axisSoftMin": 8,
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
             }
           },
           "mappings": [],
@@ -83,39 +56,74 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 18,
+        "w": 11,
         "x": 0,
         "y": 0
       },
-      "id": 11,
+      "id": 4,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "basemap": {
+          "config": {},
+          "name": "Layer 0",
+          "type": "default"
         },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": false,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "blur": 15,
+              "radius": 5,
+              "weight": {
+                "fixed": 1,
+                "max": 1,
+                "min": 0
+              }
+            },
+            "name": "Layer 1",
+            "tooltip": true,
+            "type": "heatmap"
+          }
+        ],
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "fit",
+          "lat": 0,
+          "lon": 0,
+          "zoom": 15
         }
       },
+      "pluginVersion": "11.1.4",
       "targets": [
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
+            "uid": "PostgreSQL"
           },
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  timestamp,\n  SQRT(x*x + y*y + z*z) as magnitude\nFROM\n  accelerometer_data\nWHERE\n  $__timeFilter(timestamp)\nORDER BY\n  magnitude DESC",
+          "rawSql": "SELECT\n  id,\n  severity,\n  timestamp,\n  ST_X(location::geometry) as longitude,\n  ST_Y(location::geometry) as latitude\nFROM\n  potholes\nWHERE\n  $__timeFilter(timestamp)\nORDER BY\n  timestamp DESC",
           "refId": "A",
           "sql": {
             "columns": [
               {
-                "parameters": [],
+                "parameters": [
+                  {
+                    "name": "severity",
+                    "type": "functionParameter"
+                  }
+                ],
                 "type": "function"
               }
             ],
@@ -128,23 +136,127 @@
               }
             ],
             "limit": 50
+          },
+          "table": "potholes"
+        }
+      ],
+      "title": "Pothole heatmap",
+      "type": "geomap"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "PCC52D03280B7034C"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           }
         },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 86
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 122
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "timestamp"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 215
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 18,
+        "w": 5,
+        "x": 11,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "timestamp"
+          }
+        ]
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
+            "uid": "PostgreSQL"
           },
           "editorMode": "code",
           "format": "table",
-          "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT\n  DATE_TRUNC('minute', timestamp) as time,\n  AVG(SQRT(x*x + y*y + z*z)) as avg_magnitude\nFROM\n  accelerometer_data\nWHERE\n  $__timeFilter(timestamp)\nGROUP BY\n  DATE_TRUNC('minute', timestamp)\nORDER BY\n  time ASC",
-          "refId": "B",
+          "rawSql": "SELECT timestamp,severity FROM potholes",
+          "refId": "A",
           "sql": {
             "columns": [
               {
-                "parameters": [],
+                "parameters": [
+                  {
+                    "name": "\"timestamp\"",
+                    "type": "functionParameter"
+                  }
+                ],
                 "type": "function"
               }
             ],
@@ -157,11 +269,12 @@
               }
             ],
             "limit": 50
-          }
+          },
+          "table": "potholes"
         }
       ],
-      "title": "pothole magnitude vs avg (which is almost always 9.8, 10)",
-      "type": "timeseries"
+      "title": "db inserts",
+      "type": "table"
     },
     {
       "datasource": {
@@ -199,7 +312,7 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "none"
+              "mode": "normal"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -220,130 +333,47 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "avg_deviation"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
+        "h": 9,
+        "w": 8,
+        "x": 16,
         "y": 0
-      },
-      "id": 7,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  timestamp,\n  x,\n  y,\n  z,\n  count(*) as count\nFROM\n  accelerometer_data\nWHERE\n  $__timeFilter(timestamp)\nGROUP BY\n  timestamp, x, y, z\nORDER BY\n  count DESC\nLIMIT 100",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "distribution of acceleration values",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
       },
       "id": 8,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -362,7 +392,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH base_data AS (\n  SELECT\n    timestamp,\n    SQRT(x*x + y*y + z*z) as magnitude\n  FROM\n    accelerometer_data\n  WHERE\n    $__timeFilter(timestamp)\n),\nstats AS (\n  SELECT AVG(magnitude) as avg_magnitude, STDDEV(magnitude) as stddev_magnitude\n  FROM base_data\n)\nSELECT\n  DATE_TRUNC('second', timestamp) as time,\n  AVG(magnitude) as avg_magnitude,\n  AVG(ABS(magnitude - stats.avg_magnitude)) as avg_deviation,\n  AVG((magnitude - stats.avg_magnitude) / NULLIF(stats.stddev_magnitude, 0)) as avg_zscore\nFROM\n  base_data, stats\nGROUP BY\n  DATE_TRUNC('second', timestamp)\nORDER BY\n  time ASC",
+          "rawSql": "WITH base_data AS (\n  SELECT\n    timestamp,\n    SQRT(x*x + y*y + z*z) as magnitude\n  FROM\n    accelerometer_data\n  WHERE\n    $__timeFilter(timestamp)\n)\nSELECT\n  DATE_TRUNC('second', timestamp) as time,\n  AVG(ABS(magnitude - 9.81)) as avg_deviation\nFROM\n  base_data\nGROUP BY\n  DATE_TRUNC('second', timestamp)\nORDER BY\n  time ASC",
           "refId": "A",
           "sql": {
             "columns": [
@@ -383,7 +413,7 @@
           }
         }
       ],
-      "title": "Panel Title",
+      "title": "average deviation from gravitational acceleration 9.81",
       "type": "timeseries"
     },
     {
@@ -446,16 +476,17 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 9
       },
       "id": 6,
       "options": {
         "legend": {
           "calcs": [
-            "mean"
+            "mean",
+            "max"
           ],
           "displayMode": "table",
           "placement": "bottom",
@@ -496,1313 +527,8 @@
           }
         }
       ],
-      "title": "Panel Title",
+      "title": "raw accelerometer data",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "area"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "super-light-green",
-                "value": null
-              },
-              {
-                "color": "blue",
-                "value": 2
-              },
-              {
-                "color": "yellow",
-                "value": 5
-              },
-              {
-                "color": "semi-dark-red",
-                "value": 25
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 12,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "WITH base_data AS (\n  SELECT\n    timestamp,\n    SQRT(x*x + y*y + z*z) as magnitude,\n    SQRT(x*x + y*y + z*z) - 9.81 as magnitude_deviation\n  FROM\n    accelerometer_data\n  WHERE\n    $__timeFilter(timestamp)\n)\nSELECT\n  DATE_TRUNC('second', timestamp) as time,\n  AVG(magnitude) as avg_magnitude,\n  AVG(magnitude_deviation) as avg_deviation,\n  STDDEV(magnitude_deviation) as stddev_deviation,\n  MAX(ABS(magnitude_deviation)) as max_abs_deviation\nFROM\n  base_data\nGROUP BY\n  DATE_TRUNC('second', timestamp)\nORDER BY\n  time ASC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "area"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "super-light-green",
-                "value": null
-              },
-              {
-                "color": "blue",
-                "value": 0.1
-              },
-              {
-                "color": "yellow",
-                "value": 0.3
-              },
-              {
-                "color": "semi-dark-red",
-                "value": 0.5
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "WITH base_data AS (\n  SELECT\n    timestamp,\n    SQRT(x*x + y*y + z*z) - 9.81 as magnitude_deviation\n  FROM\n    accelerometer_data\n  WHERE\n    $__timeFilter(timestamp)\n)\nSELECT\n  DATE_TRUNC('second', timestamp) as time,\n  STDDEV(magnitude_deviation) as stddev_deviation\nFROM\n  base_data\nGROUP BY\n  DATE_TRUNC('second', timestamp)\nORDER BY\n  time ASC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 24
-      },
-      "id": 13,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "WITH base_data AS (\n  SELECT\n    timestamp,\n    SQRT(x*x + y*y + z*z) as magnitude,\n    SQRT(x*x + y*y + z*z) - 9.81 as magnitude_deviation\n  FROM\n    accelerometer_data\n  WHERE\n    $__timeFilter(timestamp)\n),\npothole_data AS (\n  SELECT\n    timestamp,\n    magnitude,\n    magnitude_deviation,\n    CASE\n      WHEN ABS(magnitude_deviation) > 2.0 THEN 3\n      WHEN ABS(magnitude_deviation) > 1.0 THEN 2\n      WHEN ABS(magnitude_deviation) > 0.5 THEN 1\n      ELSE 0\n    END as pothole_severity\n  FROM\n    base_data\n)\nSELECT\n  timestamp,\n  magnitude,\n  magnitude_deviation,\n  pothole_severity\nFROM\n  pothole_data\nWHERE\n  pothole_severity > 0\nORDER BY\n  timestamp ASC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "area"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "super-light-green",
-                "value": null
-              },
-              {
-                "color": "blue",
-                "value": 0.5
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "semi-dark-red",
-                "value": 3
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
-      "id": 15,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "WITH base_data AS (\n  SELECT\n    timestamp,\n    SQRT(x*x + y*y + z*z) - 9.81 as magnitude_deviation\n  FROM\n    accelerometer_data\n  WHERE\n    $__timeFilter(timestamp)\n)\nSELECT\n  DATE_TRUNC('second', timestamp) as time,\n  MAX(ABS(magnitude_deviation)) as max_abs_deviation\nFROM\n  base_data\nGROUP BY\n  DATE_TRUNC('second', timestamp)\nORDER BY\n  time ASC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 32
-      },
-      "id": 10,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "WITH acceleration_data AS (\n  SELECT\n    timestamp,\n    x, y, z,\n    LAG(x) OVER (ORDER BY timestamp) as prev_x,\n    LAG(y) OVER (ORDER BY timestamp) as prev_y,\n    LAG(z) OVER (ORDER BY timestamp) as prev_z,\n    EXTRACT(EPOCH FROM (timestamp - LAG(timestamp) OVER (ORDER BY timestamp))) as time_diff\n  FROM\n    accelerometer_data\n  WHERE\n    $__timeFilter(timestamp)\n),\nrate_of_change AS (\n  SELECT\n    timestamp,\n    x, y, z,\n    (x - prev_x) / NULLIF(time_diff, 0) as x_rate,\n    (y - prev_y) / NULLIF(time_diff, 0) as y_rate,\n    (z - prev_z) / NULLIF(time_diff, 0) as z_rate\n  FROM\n    acceleration_data\n),\nstats AS (\n  SELECT\n    AVG(ABS(x_rate)) as avg_x_rate,\n    STDDEV(ABS(x_rate)) as stddev_x_rate,\n    AVG(ABS(y_rate)) as avg_y_rate,\n    STDDEV(ABS(y_rate)) as stddev_y_rate,\n    AVG(ABS(z_rate)) as avg_z_rate,\n    STDDEV(ABS(z_rate)) as stddev_z_rate\n  FROM\n    rate_of_change\n)\nSELECT\n  timestamp,\n  x, y, z,\n  x_rate, y_rate, z_rate,\n  (ABS(x_rate) - avg_x_rate) / NULLIF(stddev_x_rate, 0) as x_zscore,\n  (ABS(y_rate) - avg_y_rate) / NULLIF(stddev_y_rate, 0) as y_zscore,\n  (ABS(z_rate) - avg_z_rate) / NULLIF(stddev_z_rate, 0) as z_zscore,\n  CASE \n    WHEN (ABS(x_rate) - avg_x_rate) / NULLIF(stddev_x_rate, 0) > 3 OR\n         (ABS(y_rate) - avg_y_rate) / NULLIF(stddev_y_rate, 0) > 3 OR\n         (ABS(z_rate) - avg_z_rate) / NULLIF(stddev_z_rate, 0) > 3 \n    THEN 'Potential Pothole'\n    ELSE 'Normal'\n  END as pothole_indicator\nFROM\n  rate_of_change, stats\nWHERE\n  (ABS(x_rate) - avg_x_rate) / NULLIF(stddev_x_rate, 0) > 2 OR\n  (ABS(y_rate) - avg_y_rate) / NULLIF(stddev_y_rate, 0) > 2 OR\n  (ABS(z_rate) - avg_z_rate) / NULLIF(stddev_z_rate, 0) > 2\nORDER BY\n  timestamp ASC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMax": 13,
-            "axisSoftMin": 8,
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "magnitude"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 32
-      },
-      "id": 16,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  timestamp,\n  SQRT(x*x + y*y + z*z) as magnitude\nFROM\n  accelerometer_data\nWHERE\n  $__timeFilter(timestamp)\n  AND SQRT(x*x + y*y + z*z) > 9.81\nORDER BY\n  magnitude DESC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "pothole magnitude vs avg (which is almost always 9.8, 10)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 40
-      },
-      "id": 9,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  timestamp,\n  y,\n  x,\n  z,\n  SQRT(x*x + y*y + z*z) as magnitude\nFROM\n  accelerometer_data\nWHERE\n  $__timeFilter(timestamp)\nORDER BY\n  timestamp DESC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "table": "potholes"
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PostgreSQL"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 40
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PostgreSQL"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT timestamp AT TIME ZONE 'UTC' AS utc_timestamp,id,severity FROM potholes;\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "severity",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "table": "potholes"
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PCC52D03280B7034C"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 48
-      },
-      "id": 5,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PCC52D03280B7034C"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  timestamp,\n  ST_X(location::geometry) as lon,\n  ST_Y(location::geometry) as lat,\n  SQRT(x*x + y*y + z*z) as magnitude\nFROM\n  accelerometer_data\nWHERE\n  $__timeFilter(timestamp)\nORDER BY\n  magnitude DESC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PostgreSQL"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 56
-      },
-      "id": 2,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "id"
-          }
-        ]
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PostgreSQL"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT * FROM potholes",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "\"timestamp\"",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "table": "potholes"
-        }
-      ],
-      "title": "Panel Title",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PostgreSQL"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 64
-      },
-      "id": 4,
-      "options": {
-        "controls": {
-          "mouseWheelZoom": true,
-          "showAttribution": true,
-          "showDebug": false,
-          "showMeasure": false,
-          "showScale": false,
-          "showZoom": true
-        },
-        "layers": [
-          {
-            "config": {
-              "showLegend": true,
-              "style": {
-                "color": {
-                  "fixed": "dark-green"
-                },
-                "opacity": 0.4,
-                "rotation": {
-                  "fixed": 0,
-                  "max": 360,
-                  "min": -360,
-                  "mode": "mod"
-                },
-                "size": {
-                  "fixed": 5,
-                  "max": 15,
-                  "min": 2
-                },
-                "symbol": {
-                  "fixed": "img/icons/marker/circle.svg",
-                  "mode": "fixed"
-                },
-                "symbolAlign": {
-                  "horizontal": "center",
-                  "vertical": "center"
-                },
-                "textConfig": {
-                  "fontSize": 12,
-                  "offsetX": 0,
-                  "offsetY": 0,
-                  "textAlign": "center",
-                  "textBaseline": "middle"
-                }
-              }
-            },
-            "location": {
-              "mode": "auto"
-            },
-            "name": "Layer 1",
-            "tooltip": true,
-            "type": "markers"
-          }
-        ],
-        "tooltip": {
-          "mode": "details"
-        },
-        "view": {
-          "allLayers": true,
-          "id": "zero",
-          "lat": 0,
-          "lon": 0,
-          "zoom": 1
-        }
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PostgreSQL"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  ST_AsGeoJSON(location)::json->>'coordinates' AS location,\n  severity\nFROM\n  potholes\nWHERE\n  $__timeFilter(timestamp)\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "severity",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          },
-          "table": "potholes"
-        }
-      ],
-      "title": "Panel Title",
-      "type": "geomap"
     }
   ],
   "refresh": "",
@@ -1812,13 +538,13 @@
     "list": []
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "asd",
-  "uid": "asd",
-  "version": 3,
+  "title": "Pothole dashboard",
+  "uid": "pothole-dashboard",
+  "version": 7,
   "weekStart": ""
 }
