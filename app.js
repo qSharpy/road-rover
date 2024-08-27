@@ -248,15 +248,10 @@ function handleMotion(event) {
 
     const currentTime = Date.now();
 
-    // Send accelerometer data continuously (e.g., every 1 seconds)
-    if (currentTime - lastSentTime > 1000) {  // 1000 ms = 1 seconds
+    // Send accelerometer data every 1 second
+    if (currentTime - lastSentTime > 1000) {  // 1000 ms = 1 second
         postAccelerometerData();
         lastSentTime = currentTime;
-    }
-
-    // Detect pothole only when significant motion is detected
-    if (Math.abs(y) > 10) {
-        detectPothole();
     }
 
     // Clear accelerometer data every 10 seconds
@@ -291,7 +286,6 @@ async function postAccelerometerData() {
     try {
         console.log("Sending accelerometer data:", accelerometerData);
 
-        // Send data to accelerometer data storage endpoint
         const response = await fetch('https://road-rover.gris.ninja/api/accelerometer-data', {
             method: 'POST',
             headers: {
@@ -302,32 +296,15 @@ async function postAccelerometerData() {
 
         const result = await response.json();
         console.log("Accelerometer data response:", result);
-    } catch (error) {
-        console.error("Error posting accelerometer data:", error);
-    }
-}
-
-async function detectPothole() {
-    try {
-        console.log("Sending data for pothole detection:", accelerometerData);
-
-        // Send data to pothole detection endpoint
-        const response = await fetch('https://road-rover.gris.ninja/api/pothole-detection', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(accelerometerData)
-        });
-
-        const result = await response.json();
-        console.log("Pothole detection response:", result);
 
         // If potholes were detected, update the map
-        if (result.potholes && result.potholes.length > 0) {
+        if (result.potholes_detected > 0) {
             fetchAndDisplayPotholes();
         }
+
+        // Clear the accelerometer data after sending
+        accelerometerData = [];
     } catch (error) {
-        console.error("Error detecting potholes:", error);
+        console.error("Error posting accelerometer data:", error);
     }
 }

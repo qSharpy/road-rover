@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float
 from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
+import math
 
 # Define version number
 BACKEND_VERSION = "0.65-accelerometer-data"
@@ -91,46 +92,62 @@ async def root():
 async def get_backend_version():
     return {"version": BACKEND_VERSION}
 
-@app.post("/api/pothole-detection")
-async def detect_pothole(data: List[AccelerometerData], db: AsyncSession = Depends(get_db)):
+@app.post("/api/accelerometer-data")
+async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSession = Depends(get_db)):
     global last_detection_time
+    logger.info(f"Received accelerometer data: {data}")
 
-    # Define a minimum interval (e.g., 2 seconds) between consecutive inserts
     min_interval = timedelta(seconds=1)
     current_time = datetime.utcnow()
-
     potholes = []
 
-    for entry in data:
-        x, y, z = entry.acceleration
+    try:
+        for entry in data:
+            x, y, z = entry.acceleration
+            lat, lon = entry.coordinates
 
-        # Log the incoming data
-        #logging.info(f"Received data: x={x}, y={y}, z={z}, coordinates={entry.coordinates}")
-
-        # Simple pothole detection logic based on z-axis (up-down) acceleration
-        severity = None
-        if abs(y) > 14:
-            severity = "large"
-        elif abs(y) > 12:
-            severity = "medium"
-        elif abs(y) > 10:
-            severity = "small"
-
-        # Only insert if a pothole is detected and enough time has passed since the last detection
-        if severity and (last_detection_time is None or current_time - last_detection_time > min_interval):
-            pothole = Pothole(
-                severity=severity,
-                location=f"SRID=4326;POINT({entry.coordinates[1]} {entry.coordinates[0]})"
+            # Store accelerometer data
+            reading = AccelerometerReading(
+                x=x, y=y, z=z,
+                location=f"SRID=4326;POINT({lon} {lat})"
             )
-            db.add(pothole)
-            potholes.append(pothole)
-            last_detection_time = current_time  # Update the last detection time
+            db.add(reading)
 
-    if potholes:
-        logging.info(f"Potholes detected: {potholes}")
+            # Calculate magnitude of acceleration
+            magnitude = math.sqrt(x*x + y*y + z*z)
+            
+            # Calculate deviation from standard gravity
+            deviation = abs(magnitude - 9.81)
+
+            # Determine severity based on deviation
+            severity = None
+            if deviation > 1.0:
+                severity = "large"
+            elif deviation > 0.5:
+                severity = "medium"
+            elif deviation > 0.35:
+                severity = "small"
+
+            # Only insert if a pothole is detected and enough time has passed since the last detection
+            if severity and (last_detection_time is None or current_time - last_detection_time > min_interval):
+                pothole = Pothole(
+                    severity=severity,
+                    location=f"SRID=4326;POINT({lon} {lat})"
+                )
+                db.add(pothole)
+                potholes.append(pothole)
+                last_detection_time = current_time  # Update the last detection time
+
+        if potholes:
+            logging.info(f"Potholes detected: {potholes}")
+        
         await db.commit()
-
-    return {"potholes": [p.severity for p in potholes] if potholes else "No potholes detected"}
+        logger.info("Accelerometer data processed and stored successfully")
+        return {"message": "Data processed successfully", "potholes_detected": len(potholes)}
+    except Exception as e:
+        logger.error(f"Error processing accelerometer data: {str(e)}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Error processing accelerometer data")
 
 @app.get("/api/potholes", response_model=List[PotholeResponse])
 async def get_potholes(db: AsyncSession = Depends(get_db)):
@@ -162,26 +179,3 @@ async def get_potholes(db: AsyncSession = Depends(get_db)):
         })
 
     return pothole_data
-
-@app.post("/api/accelerometer-data")
-async def store_accelerometer_data(data: List[AccelerometerData], db: AsyncSession = Depends(get_db)):
-    logger.info(f"Received accelerometer data: {data}")
-    try:
-        for entry in data:
-            x, y, z = entry.acceleration
-            lat, lon = entry.coordinates
-            reading = AccelerometerReading(
-                x=x,
-                y=y,
-                z=z,
-                location=f"SRID=4326;POINT({lon} {lat})"
-            )
-            db.add(reading)
-        
-        await db.commit()
-        logger.info("Accelerometer data stored successfully")
-        return {"message": "Data stored successfully"}
-    except Exception as e:
-        logger.error(f"Error storing accelerometer data: {str(e)}")
-        await db.rollback()
-        raise HTTPException(status_code=500, detail="Error storing accelerometer data")
