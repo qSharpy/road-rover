@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.76-make ios work";
+const FRONTEND_VERSION = "0.77-zoomzoomzoom";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -86,7 +86,7 @@ reCenterButton.addEventListener('click', () => {
     shouldReCenter = true;
     userHasMovedMap = false;
     if (locationMarker) {
-        map.setView(locationMarker.getLatLng(), 13);
+        map.setView(locationMarker.getLatLng(), 16);
     }
 });
 
@@ -155,7 +155,7 @@ navigator.geolocation.watchPosition(function(position) {
 
     // Re-center the map if allowed and if the user hasn't moved the map manually
     if (shouldReCenter && !userHasMovedMap) {
-        map.setView(averagedLocation, 13);
+        map.setView(averagedLocation, 16);
     }
 
 }, function(error) {
