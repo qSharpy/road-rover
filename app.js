@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.79-backgroundDetection";
+const FRONTEND_VERSION = "0.80-backgroundDetection";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -219,7 +219,7 @@ function getPotholeColor(severity) {
 }
 
 // Accelerometer data collection
-let collecting = false;
+//let collecting = false;
 let accelerometerData = [];
 let lastSentTime = Date.now();
 let lastClearTime = Date.now();
