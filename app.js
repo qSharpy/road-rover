@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.77-zoomzoomzoom";
+const FRONTEND_VERSION = "0.78-recalculatePotholes";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -333,3 +333,31 @@ async function postAccelerometerData() {
         console.error("Error posting accelerometer data:", error);
     }
 }
+
+// Add this function to your app.js file
+async function recalculatePotholes() {
+    try {
+        const response = await fetch('https://road-rover.gris.ninja/api/recalculate-potholes', {
+            method: 'POST'
+        });
+        const result = await response.json();
+        console.log(result.message);
+        // After recalculation, fetch and display the new potholes
+        fetchAndDisplayPotholes();
+    } catch (error) {
+        console.error("Error recalculating potholes:", error);
+    }
+}
+
+// Add a button to your HTML
+const recalculateButton = document.createElement('button');
+recalculateButton.textContent = 'Recalculate Potholes';
+recalculateButton.style.position = 'absolute';
+recalculateButton.style.bottom = '90px';
+recalculateButton.style.right = '10px';
+recalculateButton.style.padding = '5px 10px';
+recalculateButton.style.zIndex = '1000';
+recalculateButton.addEventListener('click', recalculatePotholes);
+
+// Add the button to the map container
+mapContainer.appendChild(recalculateButton);

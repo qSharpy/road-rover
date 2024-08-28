@@ -12,7 +12,7 @@ import math
 from dateutil import parser  # Add this import at the top of your file
 
 # Define version number
-BACKEND_VERSION = "0.70-fix backend errors"
+BACKEND_VERSION = "0.71-fix backend errors"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -192,3 +192,60 @@ async def get_potholes(db: AsyncSession = Depends(get_db)):
         })
 
     return pothole_data
+
+async def clear_and_recalculate_potholes(db: AsyncSession):
+    # Clear the pothole table
+    await db.execute("DELETE FROM potholes")
+
+    # Fetch all accelerometer data
+    result = await db.execute("SELECT timestamp, x, y, z, ST_AsText(location) FROM accelerometer_data ORDER BY timestamp")
+    accelerometer_data = result.fetchall()
+
+    # Group data by second
+    grouped_data = {}
+    for row in accelerometer_data:
+        timestamp, x, y, z, location = row
+        second_key = timestamp.replace(microsecond=0)
+        
+        if second_key not in grouped_data:
+            grouped_data[second_key] = {"magnitudes": [], "coordinates": location}
+        
+        magnitude = math.sqrt(x*x + y*y + z*z)
+        grouped_data[second_key]["magnitudes"].append(magnitude)
+
+    # Process grouped data and insert new potholes
+    min_interval = timedelta(seconds=1.5)
+    last_detection_time = None
+
+    for timestamp, group in grouped_data.items():
+        avg_magnitude = sum(group["magnitudes"]) / len(group["magnitudes"])
+        avg_deviation = abs(avg_magnitude - 9.81)
+
+        severity = None
+        if avg_deviation > 1.0:
+            severity = "large"
+        elif avg_deviation > 0.5:
+            severity = "medium"
+        elif avg_deviation > 0.35:
+            severity = "small"
+
+        if severity and (last_detection_time is None or timestamp - last_detection_time > min_interval):
+            location = group["coordinates"]
+            pothole = Pothole(
+                severity=severity,
+                timestamp=timestamp,
+                location=location
+            )
+            db.add(pothole)
+            last_detection_time = timestamp
+
+    await db.commit()
+
+@app.post("/api/recalculate-potholes")
+async def recalculate_potholes(db: AsyncSession = Depends(get_db)):
+    try:
+        await clear_and_recalculate_potholes(db)
+        return {"message": "Potholes recalculated successfully"}
+    except Exception as e:
+        logger.error(f"Error recalculating potholes: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error recalculating potholes: {str(e)}")
