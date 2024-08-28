@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.82-backgroundDetection";
+const FRONTEND_VERSION = "0.83-backgroundDetection";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');

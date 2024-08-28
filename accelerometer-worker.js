@@ -18,6 +18,7 @@ function collectData() {
             }, true);
         } else {
             console.error('DeviceMotionEvent is not supported in this context');
+            alert('DeviceMotionEvent is not supported in this context');
         }
     }
 }
