@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.78-recalculatePotholes";
+const FRONTEND_VERSION = "0.79-backgroundDetection";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -227,10 +227,89 @@ let lastClearTime = Date.now();
 const logElement = document.getElementById('log');
 const toggleButton = document.getElementById('toggle-accelerometer');
 
+let worker;
+
+toggleButton.addEventListener('click', () => {
+    collecting = !collecting;
+
+    if (collecting) {
+        console.log("Starting accelerometer data collection");
+        toggleButton.textContent = 'Stop Accelerometer';
+        
+        if ('Worker' in window) {
+            if (!worker) {
+                worker = new Worker('accelerometer-worker.js');
+                worker.onmessage = function(e) {
+                    handleMotionData(e.data);
+                };
+            }
+            worker.postMessage({command: 'start'});
+        } else {
+            // Fallback to direct DeviceMotion API for devices that don't support Web Workers
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', handleMotion, true);
+            } else {
+                console.error('DeviceMotionEvent is not supported on your device.');
+                alert('DeviceMotionEvent is not supported on your device. This means that the accelerometer data will not be collected when the app is running in the background.');
+                collecting = false;
+                toggleButton.textContent = 'Start Accelerometer';
+            }
+        }
+
+        // Check if it's an iOS device
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
+        if (isIOS) {
+            // Request permission for iOS 13+
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('devicemotion', handleMotion, true);
+                        } else {
+                            console.error('Permission to access motion sensors was denied');
+                            alert('Permission to access motion sensors was denied');
+                            collecting = false;
+                            toggleButton.textContent = 'Start Accelerometer';
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Handle older versions of iOS
+                window.addEventListener('devicemotion', handleMotion, true);
+            }
+        }
+    } else {
+        console.log("Stopping accelerometer data collection");
+        toggleButton.textContent = 'Start Accelerometer';
+        if (worker) {
+            worker.postMessage({command: 'stop'});
+        } else {
+            window.removeEventListener('devicemotion', handleMotion, true);
+        }
+        logElement.textContent = 'No data yet';
+    }
+});
+
+// Keep the original handleMotion function for direct DeviceMotion API use
 function handleMotion(event) {
     const { x, y, z } = event.accelerationIncludingGravity;
     const timestamp = new Date().toISOString();
 
+    // Process the data
+    processAccelerometerData(x, y, z, timestamp);
+}
+
+// New function to handle data from Web Worker
+function handleMotionData(data) {
+    const { x, y, z, timestamp } = data;
+
+    // Process the data
+    processAccelerometerData(x, y, z, timestamp);
+}
+
+// Common function to process accelerometer data
+function processAccelerometerData(x, y, z, timestamp) {
     // Collect data
     accelerometerData.push({
         timestamp,
@@ -261,51 +340,6 @@ function handleMotion(event) {
         console.log("Cleared accelerometer data");
     }
 }
-
-toggleButton.addEventListener('click', () => {
-    collecting = !collecting;
-
-    if (collecting) {
-        console.log("Starting accelerometer data collection");
-        toggleButton.textContent = 'Stop Accelerometer';
-        
-        // Check if it's an iOS device
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
-        if (isIOS) {
-            // Request permission for iOS 13+
-            if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            window.addEventListener('devicemotion', handleMotion, true);
-                        } else {
-                            console.error('Permission to access motion sensors was denied');
-                            alert('Permission to access motion sensors was denied');
-                            collecting = false;
-                            toggleButton.textContent = 'Start Accelerometer';
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                // Handle older versions of iOS
-                window.addEventListener('devicemotion', handleMotion, true);
-            }
-        } else if (window.DeviceMotionEvent) {
-            window.addEventListener('devicemotion', handleMotion, true);
-        } else {
-            console.error('DeviceMotionEvent is not supported on your device.');
-            alert('DeviceMotionEvent is not supported on your device.');
-            collecting = false;
-            toggleButton.textContent = 'Start Accelerometer';
-        }
-    } else {
-        console.log("Stopping accelerometer data collection");
-        toggleButton.textContent = 'Start Accelerometer';
-        window.removeEventListener('devicemotion', handleMotion, true);
-        logElement.textContent = 'No data yet';
-    }
-});
 
 async function postAccelerometerData() {
     try {
@@ -361,3 +395,11 @@ recalculateButton.addEventListener('click', recalculatePotholes);
 
 // Add the button to the map container
 mapContainer.appendChild(recalculateButton);
+
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        console.log('Page is hidden, but we continue to collect data');
+    } else {
+        console.log('Page is visible again');
+    }
+});
