@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import math
 
 # Define version number
-BACKEND_VERSION = "0.67-incr. poth. min_interv"
+BACKEND_VERSION = "0.68-fix backend pothole detect."
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -102,41 +102,53 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
     potholes = []
 
     try:
+        # Group data by second
+        grouped_data = {}
         for entry in data:
             x, y, z = entry.acceleration
             lat, lon = entry.coordinates
+            timestamp = datetime.fromisoformat(entry.timestamp)
+            second_key = timestamp.replace(microsecond=0)
+
+            if second_key not in grouped_data:
+                grouped_data[second_key] = {"magnitudes": [], "coordinates": (lat, lon)}
+            
+            magnitude = math.sqrt(x*x + y*y + z*z)
+            grouped_data[second_key]["magnitudes"].append(magnitude)
 
             # Store accelerometer data
             reading = AccelerometerReading(
                 x=x, y=y, z=z,
+                timestamp=timestamp,
                 location=f"SRID=4326;POINT({lon} {lat})"
             )
             db.add(reading)
 
-            # Calculate magnitude of acceleration
-            magnitude = math.sqrt(x*x + y*y + z*z)
-            
-            # Calculate deviation from standard gravity
-            deviation = abs(magnitude - 9.81)
+        # Process grouped data
+        for timestamp, group in grouped_data.items():
+            avg_magnitude = sum(group["magnitudes"]) / len(group["magnitudes"])
+            avg_deviation = abs(avg_magnitude - 9.81)
 
-            # Determine severity based on deviation
+            # Determine severity based on average deviation
             severity = None
-            if deviation > 1.0:
+            if avg_deviation > 1.0:
                 severity = "large"
-            elif deviation > 0.5:
+            elif avg_deviation > 0.5:
                 severity = "medium"
-            elif deviation > 0.35:
+            elif avg_deviation > 0.35:
                 severity = "small"
 
             # Only insert if a pothole is detected and enough time has passed since the last detection
-            if severity and (last_detection_time is None or current_time - last_detection_time > min_interval):
+            if severity and (last_detection_time is None or timestamp - last_detection_time > min_interval):
+                lat, lon = group["coordinates"]
                 pothole = Pothole(
                     severity=severity,
+                    timestamp=timestamp,
                     location=f"SRID=4326;POINT({lon} {lat})"
                 )
                 db.add(pothole)
                 potholes.append(pothole)
-                last_detection_time = current_time  # Update the last detection time
+                last_detection_time = timestamp  # Update the last detection time
 
         if potholes:
             logging.info(f"Potholes detected: {potholes}")
