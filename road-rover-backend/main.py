@@ -9,9 +9,10 @@ from sqlalchemy import Column, Integer, String, DateTime, Float
 from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 import math
+from dateutil import parser  # Add this import at the top of your file
 
 # Define version number
-BACKEND_VERSION = "0.68-fix backend pothole detect."
+BACKEND_VERSION = "0.69-fix backend pothole detect."
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -107,7 +108,7 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
         for entry in data:
             x, y, z = entry.acceleration
             lat, lon = entry.coordinates
-            timestamp = datetime.fromisoformat(entry.timestamp)
+            timestamp = parser.isoparse(entry.timestamp)  # Use dateutil.parser instead
             second_key = timestamp.replace(microsecond=0)
 
             if second_key not in grouped_data:
@@ -159,7 +160,7 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
     except Exception as e:
         logger.error(f"Error processing accelerometer data: {str(e)}")
         await db.rollback()
-        raise HTTPException(status_code=500, detail="Error processing accelerometer data")
+        raise HTTPException(status_code=500, detail=f"Error processing accelerometer data: {str(e)}")
 
 @app.get("/api/potholes", response_model=List[PotholeResponse])
 async def get_potholes(db: AsyncSession = Depends(get_db)):
