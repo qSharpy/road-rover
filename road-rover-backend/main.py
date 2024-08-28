@@ -12,7 +12,7 @@ import math
 from dateutil import parser  # Add this import at the top of your file
 
 # Define version number
-BACKEND_VERSION = "0.69-fix backend pothole detect."
+BACKEND_VERSION = "0.70-fix backend errors"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -28,7 +28,7 @@ class Pothole(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     severity = Column(String, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime(timezone=False), default=datetime.utcnow)
     location = Column(Geometry("POINT"))
 
 # Define AccelerometerReading model
@@ -36,7 +36,7 @@ class AccelerometerReading(Base):
     __tablename__ = "accelerometer_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime(timezone=False), default=datetime.utcnow)
     x = Column(Float)
     y = Column(Float)
     z = Column(Float)
@@ -108,7 +108,7 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
         for entry in data:
             x, y, z = entry.acceleration
             lat, lon = entry.coordinates
-            timestamp = parser.isoparse(entry.timestamp)  # Use dateutil.parser instead
+            timestamp = parser.isoparse(entry.timestamp).replace(tzinfo=None)  # Remove timezone info
             second_key = timestamp.replace(microsecond=0)
 
             if second_key not in grouped_data:
