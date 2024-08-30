@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI, HTTPException, Depends, Header, status
 from fastapi import UploadFile, File, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse,StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Tuple
@@ -17,7 +17,7 @@ from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.86- profile photo upload"
+BACKEND_VERSION = "0.87- profile photo upload"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -226,8 +226,8 @@ async def update_profile(username: str, photo: UploadFile = File(None), email: s
             raise HTTPException(status_code=404, detail="User not found")
 
         update_fields = []
-        params = {}
-        if photo is not None:
+        params = {"username": username}
+        if photo:
             # Validate photo size
             photo_bytes = await photo.read()
             if len(photo_bytes) > 15 * 1024 * 1024:  # 15MB
@@ -235,16 +235,15 @@ async def update_profile(username: str, photo: UploadFile = File(None), email: s
             
             update_fields.append("photo_binary = :photo_binary")
             params["photo_binary"] = photo_bytes
-        if email is not None:
+        if email:
             update_fields.append("email = :email")
             params["email"] = email
-        if password is not None and password.strip() != "":
+        if password:
             hashed_password = get_password_hash(password)
             update_fields.append("hashed_password = :hashed_password")
             params["hashed_password"] = hashed_password
 
         if update_fields:
-            params["username"] = username
             update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE username = :username"
             await db.execute(update_query, params)
             await db.commit()
@@ -352,6 +351,15 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
         logger.error(f"Error processing accelerometer data: {str(e)}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Error processing accelerometer data: {str(e)}")
+
+@app.get("/api/profile-photo/{username}")
+async def get_profile_photo(username: str, db: AsyncSession = Depends(get_db)):
+    query = await db.execute("SELECT photo_binary FROM users WHERE username = :username", {"username": username})
+    user = query.first()
+    if not user or not user.photo_binary:
+        raise HTTPException(status_code=404, detail="Profile photo not found")
+    
+    return StreamingResponse(io.BytesIO(user.photo_binary), media_type="image/jpeg")
 
 @app.get("/api/potholes", response_model=List[PotholeResponse])
 async def get_potholes(db: AsyncSession = Depends(get_db)):

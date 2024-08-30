@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.103-add profile photo upload";
+const FRONTEND_VERSION = "0.104-add profile photo upload";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -595,7 +595,20 @@ function showProfilePage() {
         document.body.removeChild(modal);
     });
 
-    // Fetch and display pothole statistics
+    async function fetchProfilePhoto() {
+        try {
+            const response = await fetch(`https://road-rover.gris.ninja/api/profile-photo/${currentUser.username}`);
+            if (response.ok) {
+                const blob = await response.blob();
+                const photoUrl = URL.createObjectURL(blob);
+                document.getElementById('profilePhoto').src = photoUrl;
+            }
+        } catch (error) {
+            console.error('Error fetching profile photo:', error);
+        }
+    }
+
+    fetchProfilePhoto();
     fetchPotholeStats();
     fetchUserStats();
 }
@@ -642,8 +655,8 @@ async function saveProfileChanges() {
     if (photoUpload.files.length > 0) {
         formData.append('photo', photoUpload.files[0]);
     }
-    formData.append('email', email);
-    formData.append('password', password);
+    if (email) formData.append('email', email);
+    if (password) formData.append('password', password);
 
     try {
         const response = await fetch(`https://road-rover.gris.ninja/api/update-profile/${currentUser.username}`, {
