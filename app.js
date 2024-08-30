@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.97-fix backend fetch";
+const FRONTEND_VERSION = "0.98-fix backend fetch";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -539,7 +539,7 @@ function showProfilePage() {
 
     modalContent.innerHTML = `
         <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 20px; overflow: hidden; border-radius: 50%;">
-            <img src="${currentUser.photoUrl || 'default-profile.jpg'}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="${currentUser.photoUrl || 'default-profile.jpeg'}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         <h2 style="margin-bottom: 20px;" id="usernameDisplay">Loading...</h2>
         <div style="display: flex; justify-content: space-around; margin-bottom: 30px;">
