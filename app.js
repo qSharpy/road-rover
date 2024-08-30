@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.80 add profile section";
+const FRONTEND_VERSION = "0.81 add profile section fix night mode";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -56,6 +56,14 @@ nightModeButton.addEventListener('click', () => {
         toggleButton.style.backgroundColor = 'white';
         toggleButton.style.color = 'black';
         nightModeButton.textContent = 'Night Mode';
+
+        // Update burger menu options for day mode
+        menuOptions.style.backgroundColor = 'white';
+        menuOptions.style.color = 'black';
+        Array.from(menuOptions.children).forEach(option => {
+            option.style.backgroundColor = 'white';
+            option.style.color = 'black';
+        });
     } else {
         map.removeLayer(dayTiles);
         nightTiles.addTo(map);
@@ -70,6 +78,14 @@ nightModeButton.addEventListener('click', () => {
         toggleButton.style.backgroundColor = '#424242';
         toggleButton.style.color = 'white';
         nightModeButton.textContent = 'Day Mode';
+
+        // Update burger menu options for night mode
+        menuOptions.style.backgroundColor = '#424242';
+        menuOptions.style.color = 'white';
+        Array.from(menuOptions.children).forEach(option => {
+            option.style.backgroundColor = '#424242';
+            option.style.color = 'white';
+        });
     }
     isNightMode = !isNightMode;
 });
