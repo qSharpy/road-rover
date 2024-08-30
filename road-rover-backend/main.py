@@ -1,5 +1,6 @@
 import logging
-from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header, status
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Tuple
@@ -13,7 +14,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.80-fix profile save"
+BACKEND_VERSION = "0.81-fix profile save"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -148,19 +149,31 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
         logger.debug("Query executed")
         db_user = query.first()
         logger.debug(f"User found: {db_user is not None}")
+        
         if not db_user:
-            raise HTTPException(status_code=400, detail="Incorrect email or password")
+            logger.info(f"Login failed: User not found for email {user.email}")
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "Incorrect email or password"}
+            )
         
         logger.debug("Verifying password")
         if not verify_password(user.password, db_user.hashed_password):
-            raise HTTPException(status_code=400, detail="Incorrect email or password")
+            logger.info(f"Login failed: Incorrect password for email {user.email}")
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "Incorrect email or password"}
+            )
         
-        logger.debug("Login successful")
+        logger.info(f"Login successful for user: {db_user.username}")
         return {"message": "Login successful", "username": db_user.username}
     except Exception as e:
         logger.error(f"Login error: {type(e).__name__}, {str(e)}")
         logger.exception("Full traceback:")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Internal server error"}
+        )
 
 @app.get("/api/user-stats/{username}")
 async def get_user_stats(username: str, db: AsyncSession = Depends(get_db)):
