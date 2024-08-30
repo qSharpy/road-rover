@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.79 login signup";
+const FRONTEND_VERSION = "0.80 add profile section";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -392,9 +392,107 @@ async function signup(username, email, password) {
 function updateUIForLoggedInUser() {
     menuOptions.innerHTML = `
         <div>Logged in as ${currentUser}</div>
+        <div id="viewProfileOption" style="cursor: pointer; margin-top: 5px;">View Profile</div>
         <div id="logoutOption" style="cursor: pointer; margin-top: 5px;">Logout</div>
     `;
     document.getElementById('logoutOption').addEventListener('click', logout);
+    document.getElementById('viewProfileOption').addEventListener('click', showProfilePage);
+}
+
+function showProfilePage() {
+    const profileOverlay = document.createElement('div');
+    profileOverlay.style.position = 'fixed';
+    profileOverlay.style.top = '0';
+    profileOverlay.style.left = '0';
+    profileOverlay.style.width = '100%';
+    profileOverlay.style.height = '100%';
+    profileOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+    profileOverlay.style.zIndex = '2000';
+    profileOverlay.style.overflow = 'auto';
+    profileOverlay.style.padding = '20px';
+    profileOverlay.style.boxSizing = 'border-box';
+
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '✕';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.background = 'none';
+    closeButton.style.border = 'none';
+    closeButton.style.cursor = 'pointer';
+    closeButton.addEventListener('click', () => document.body.removeChild(profileOverlay));
+
+    const profileContent = document.createElement('div');
+    profileContent.innerHTML = `
+        <h2>Profile: ${currentUser}</h2>
+        <div>
+            <label for="profilePhoto">Profile Photo URL:</label>
+            <input type="text" id="profilePhoto" placeholder="Enter photo URL">
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter new email">
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="Enter new password">
+        </div>
+        <button id="saveProfile">Save Changes</button>
+        <h3>Pothole Statistics</h3>
+        <div id="potholeStats">Loading...</div>
+    `;
+
+    profileOverlay.appendChild(closeButton);
+    profileOverlay.appendChild(profileContent);
+    document.body.appendChild(profileOverlay);
+
+    // Fetch and display pothole statistics
+    fetchPotholeStats();
+
+    // Add event listener for saving profile changes
+    document.getElementById('saveProfile').addEventListener('click', saveProfileChanges);
+}
+
+async function fetchPotholeStats() {
+    try {
+        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser}`);
+        const stats = await response.json();
+        document.getElementById('potholeStats').innerHTML = `
+            <p>Last 24 hours: ${stats.last24Hours}</p>
+            <p>Last 30 days: ${stats.last30Days}</p>
+            <p>Total: ${stats.total}</p>
+        `;
+    } catch (error) {
+        console.error('Error fetching pothole stats:', error);
+        document.getElementById('potholeStats').textContent = 'Failed to load statistics';
+    }
+}
+
+async function saveProfileChanges() {
+    const photoUrl = document.getElementById('profilePhoto').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch(`https://road-rover.gris.ninja/api/update-profile/${currentUser}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ photoUrl, email, password })
+        });
+
+        if (response.ok) {
+            alert('Profile updated successfully');
+        } else {
+            const errorData = await response.json();
+            alert(errorData.detail || 'Failed to update profile');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        alert('An error occurred while updating the profile');
+    }
 }
 
 // Logout function

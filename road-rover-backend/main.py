@@ -13,7 +13,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.73 login signup"
+BACKEND_VERSION = "0.74 login signup"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -89,7 +89,10 @@ class UserCreate(BaseModel):
     username: str
     email: str
     password: str
-
+class ProfileUpdate(BaseModel):
+    photoUrl: str = None
+    email: str = None
+    password: str = None
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -144,6 +147,61 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     return {"message": "Login successful", "username": db_user.username}
+
+@app.get("/api/user-stats/{username}")
+async def get_user_stats(username: str, db: AsyncSession = Depends(get_db)):
+    try:
+        query = await db.execute(f"SELECT id FROM users WHERE username = '{username}'")
+        user = query.first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user_id = user.id
+        now = datetime.utcnow()
+        one_day_ago = now - timedelta(days=1)
+        thirty_days_ago = now - timedelta(days=30)
+
+        # Count potholes for different time periods
+        last_24_hours = await db.execute(f"SELECT COUNT(*) FROM potholes WHERE user_id = {user_id} AND timestamp >= '{one_day_ago}'")
+        last_30_days = await db.execute(f"SELECT COUNT(*) FROM potholes WHERE user_id = {user_id} AND timestamp >= '{thirty_days_ago}'")
+        total = await db.execute(f"SELECT COUNT(*) FROM potholes WHERE user_id = {user_id}")
+
+        return {
+            "last24Hours": last_24_hours.scalar(),
+            "last30Days": last_30_days.scalar(),
+            "total": total.scalar()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching user stats: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.post("/api/update-profile/{username}")
+async def update_profile(username: str, profile_update: ProfileUpdate, db: AsyncSession = Depends(get_db)):
+    try:
+        query = await db.execute(f"SELECT * FROM users WHERE username = '{username}'")
+        user = query.first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        update_fields = []
+        if profile_update.photoUrl is not None:
+            update_fields.append(f"photo_url = '{profile_update.photoUrl}'")
+        if profile_update.email is not None:
+            update_fields.append(f"email = '{profile_update.email}'")
+        if profile_update.password is not None:
+            hashed_password = get_password_hash(profile_update.password)
+            update_fields.append(f"hashed_password = '{hashed_password}'")
+
+        if update_fields:
+            update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE username = '{username}'"
+            await db.execute(update_query)
+            await db.commit()
+
+        return {"message": "Profile updated successfully"}
+    except Exception as e:
+        logger.error(f"Error updating profile: {str(e)}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/api/accelerometer-data")
 async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSession = Depends(get_db), x_user: str = Header(None)):
