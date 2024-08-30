@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.88-modal beautiful";
+const FRONTEND_VERSION = "0.89-modal leaderboard";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -418,17 +418,29 @@ function updateUIForLoggedInUser() {
 }
 
 function showLeaderboardPage() {
-    const leaderboardOverlay = document.createElement('div');
-    leaderboardOverlay.style.position = 'fixed';
-    leaderboardOverlay.style.top = '0';
-    leaderboardOverlay.style.left = '0';
-    leaderboardOverlay.style.width = '100%';
-    leaderboardOverlay.style.height = '100%';
-    leaderboardOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-    leaderboardOverlay.style.zIndex = '2000';
-    leaderboardOverlay.style.overflow = 'auto';
-    leaderboardOverlay.style.padding = '20px';
-    leaderboardOverlay.style.boxSizing = 'border-box';
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '2000';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.backgroundColor = isNightMode ? '#212121' : 'white';
+    modalContent.style.color = isNightMode ? 'white' : 'black';
+    modalContent.style.padding = '30px';
+    modalContent.style.borderRadius = '8px';
+    modalContent.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    modalContent.style.position = 'relative';
+    modalContent.style.width = '90%';
+    modalContent.style.maxWidth = '600px';
+    modalContent.style.maxHeight = '90%';
+    modalContent.style.overflow = 'auto';
 
     const closeButton = document.createElement('button');
     closeButton.textContent = '✕';
@@ -439,24 +451,26 @@ function showLeaderboardPage() {
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
     closeButton.style.cursor = 'pointer';
-    closeButton.addEventListener('click', () => document.body.removeChild(leaderboardOverlay));
+    closeButton.style.color = isNightMode ? 'white' : 'black';
+    closeButton.addEventListener('click', () => document.body.removeChild(modal));
 
     const leaderboardContent = document.createElement('div');
     leaderboardContent.innerHTML = `
-        <h2>Vanatorii de cratere</h2>
-        <img src="top-pothole.jpeg" alt="Top Pothole" style="max-width: 100%; height: auto; margin-bottom: 20px;">
+        <h2 style="text-align: center;">Vanatorii de cratere</h2>
+        <img src="top-pothole.jpeg" alt="Top Pothole" style="display: block; max-width: 100%; height: auto; margin: 0 auto 20px;">
         <div id="leaderboardList">Loading...</div>
     `;
 
-    leaderboardOverlay.appendChild(closeButton);
-    leaderboardOverlay.appendChild(leaderboardContent);
-    document.body.appendChild(leaderboardOverlay);
+    modalContent.appendChild(closeButton);
+    modalContent.appendChild(leaderboardContent);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
 
     // Fetch and display leaderboard
     fetchLeaderboard();
 }
 
-// Add this new function to fetch the leaderboard data
+// Update the fetchLeaderboard function to use the night mode colors
 async function fetchLeaderboard() {
     try {
         const response = await fetch('https://road-rover.gris.ninja/api/leaderboard');
@@ -466,15 +480,15 @@ async function fetchLeaderboard() {
             <table style="width: 100%; max-width: 500px; margin: 0 auto; border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Username 😎</th>
-                        <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;">nr. cratere 🚗</th>
+                        <th style="padding: 10px; text-align: left; border-bottom: 2px solid ${isNightMode ? '#444' : '#ddd'};">Username 😎</th>
+                        <th style="padding: 10px; text-align: right; border-bottom: 2px solid ${isNightMode ? '#444' : '#ddd'};">nr. cratere 🚗</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${leaderboard.map(user => `
                         <tr>
-                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${user.username}</td>
-                            <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${user.pothole_count}</td>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid ${isNightMode ? '#444' : '#ddd'};">${user.username}</td>
+                            <td style="padding: 10px; text-align: right; border-bottom: 1px solid ${isNightMode ? '#444' : '#ddd'};">${user.pothole_count}</td>
                         </tr>
                     `).join('')}
                 </tbody>
