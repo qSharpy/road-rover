@@ -12,9 +12,10 @@ from datetime import datetime, timedelta
 import math
 from dateutil import parser
 from passlib.context import CryptContext
+import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.81-fix profile save"
+BACKEND_VERSION = "0.82-fix profile save"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -112,7 +113,18 @@ class PotholeResponse(BaseModel):
 
 # Helper functions
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except ValueError as e:
+        # Log the error for debugging
+        logger.error(f"Password verification error: {str(e)}")
+        
+        # Fallback to manual bcrypt verification
+        try:
+            return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        except ValueError as e:
+            logger.error(f"Manual bcrypt verification failed: {str(e)}")
+            return False
 
 def get_password_hash(password):
     return pwd_context.hash(password)
