@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.78-recalculatePotholes";
+const FRONTEND_VERSION = "0.79 login signup";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -307,14 +307,141 @@ toggleButton.addEventListener('click', () => {
     }
 });
 
+let currentUser = null;
+
+// Create burger menu
+const burgerMenu = document.createElement('div');
+burgerMenu.innerHTML = '☰';
+burgerMenu.style.position = 'absolute';
+burgerMenu.style.top = '10px';
+burgerMenu.style.right = '10px';
+burgerMenu.style.fontSize = '24px';
+burgerMenu.style.zIndex = '1000';
+burgerMenu.style.cursor = 'pointer';
+mapContainer.appendChild(burgerMenu);
+
+// Create menu options
+const menuOptions = document.createElement('div');
+menuOptions.style.position = 'absolute';
+menuOptions.style.top = '40px';
+menuOptions.style.right = '10px';
+menuOptions.style.backgroundColor = 'white';
+menuOptions.style.padding = '10px';
+menuOptions.style.borderRadius = '5px';
+menuOptions.style.boxShadow = '0 0 10px rgba(0,0,0,0.1)';
+menuOptions.style.display = 'none';
+menuOptions.style.zIndex = '1000';
+menuOptions.innerHTML = `
+    <div id="loginOption" style="cursor: pointer; margin-bottom: 5px;">Login</div>
+    <div id="signupOption" style="cursor: pointer;">Sign Up</div>
+`;
+mapContainer.appendChild(menuOptions);
+
+// Toggle menu visibility
+burgerMenu.addEventListener('click', () => {
+    menuOptions.style.display = menuOptions.style.display === 'none' ? 'block' : 'none';
+});
+
+// Login function
+async function login(username, password) {
+    try {
+        const response = await fetch('https://road-rover.gris.ninja/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            currentUser = username;
+            alert(`Welcome back, ${username}!`);
+            updateUIForLoggedInUser();
+        } else {
+            alert(data.detail || 'Login failed');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        alert('An error occurred during login');
+    }
+}
+
+// Sign up function
+async function signup(username, password) {
+    try {
+        const response = await fetch('https://road-rover.gris.ninja/api/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert('Sign up successful! Please log in.');
+        } else {
+            alert(data.detail || 'Sign up failed');
+        }
+    } catch (error) {
+        console.error('Sign up error:', error);
+        alert('An error occurred during sign up');
+    }
+}
+
+// Update UI for logged in user
+function updateUIForLoggedInUser() {
+    menuOptions.innerHTML = `
+        <div>Logged in as ${currentUser}</div>
+        <div id="logoutOption" style="cursor: pointer; margin-top: 5px;">Logout</div>
+    `;
+    document.getElementById('logoutOption').addEventListener('click', logout);
+}
+
+// Logout function
+function logout() {
+    currentUser = null;
+    menuOptions.innerHTML = `
+        <div id="loginOption" style="cursor: pointer; margin-bottom: 5px;">Login</div>
+        <div id="signupOption" style="cursor: pointer;">Sign Up</div>
+    `;
+    setupAuthEventListeners();
+    alert('Logged out successfully');
+}
+
+// Setup event listeners for auth options
+function setupAuthEventListeners() {
+    document.getElementById('loginOption').addEventListener('click', () => {
+        const username = prompt('Enter your username:');
+        const password = prompt('Enter your password:');
+        if (username && password) {
+            login(username, password);
+        }
+    });
+
+    document.getElementById('signupOption').addEventListener('click', () => {
+        const username = prompt('Choose a username:');
+        const password = prompt('Choose a password:');
+        if (username && password) {
+            signup(username, password);
+        }
+    });
+}
+
+setupAuthEventListeners();
+
 async function postAccelerometerData() {
+    if (!currentUser) {
+        console.log("User not logged in. Data not sent.");
+        return;
+    }
     try {
         console.log("Sending accelerometer data:", accelerometerData);
 
         const response = await fetch('https://road-rover.gris.ninja/api/accelerometer-data', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-User': currentUser
             },
             body: JSON.stringify(accelerometerData)
         });
@@ -322,12 +449,10 @@ async function postAccelerometerData() {
         const result = await response.json();
         console.log("Accelerometer data response:", result);
 
-        // If potholes were detected, update the map
         if (result.potholes_detected > 0) {
             fetchAndDisplayPotholes();
         }
 
-        // Clear the accelerometer data after sending
         accelerometerData = [];
     } catch (error) {
         console.error("Error posting accelerometer data:", error);
