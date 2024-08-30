@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.87-modal beautiful";
+const FRONTEND_VERSION = "0.88-modal beautiful";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -602,10 +602,10 @@ function setupAuthEventListeners() {
 setupAuthEventListeners();
 
 function showLoginModal() {
-    const modal = createModal('Sign In', `
-        <input type="text" id="loginUsername" placeholder="Username" required class="modal-input">
-        <input type="password" id="loginPassword" placeholder="Password" required class="modal-input">
-        <button id="loginSubmit" class="modal-submit">Sign In</button>
+    const modal = createModal('Intra in cont', `
+        <input type="text" id="loginUsername" placeholder="Email" required class="modal-input">
+        <input type="password" id="loginPassword" placeholder="Parola" required class="modal-input">
+        <button id="loginSubmit" class="modal-submit">Conecteaza-te</button>
     `);
 
     document.getElementById('loginSubmit').addEventListener('click', () => {
@@ -619,11 +619,11 @@ function showLoginModal() {
 }
 
 function showSignupModal() {
-    const modal = createModal('Sign Up', `
-        <input type="text" id="signupUsername" placeholder="Choose a username" required class="modal-input">
-        <input type="email" id="signupEmail" placeholder="Enter your email" required class="modal-input">
-        <input type="password" id="signupPassword" placeholder="Choose a password" required class="modal-input">
-        <button id="signupSubmit" class="modal-submit">Sign Up</button>
+    const modal = createModal('Creeaza cont nou', `
+        <input type="text" id="signupUsername" placeholder="Username" required class="modal-input">
+        <input type="email" id="signupEmail" placeholder="Email" required class="modal-input">
+        <input type="password" id="signupPassword" placeholder="Parola" required class="modal-input">
+        <button id="signupSubmit" class="modal-submit">Inregistreaza-te</button>
     `);
 
     document.getElementById('signupSubmit').addEventListener('click', () => {
