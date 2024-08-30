@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.81 add profile section fix night mode";
+const FRONTEND_VERSION = "0.82 add profile section fix night mode";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -422,7 +422,7 @@ function showProfilePage() {
     profileOverlay.style.left = '0';
     profileOverlay.style.width = '100%';
     profileOverlay.style.height = '100%';
-    profileOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+    profileOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
     profileOverlay.style.zIndex = '2000';
     profileOverlay.style.overflow = 'auto';
     profileOverlay.style.padding = '20px';
