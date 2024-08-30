@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.101-add profile photo upload";
+const FRONTEND_VERSION = "0.102-add profile photo upload";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -574,10 +574,12 @@ function showProfilePage() {
 
     // Display user's profile photo
     const profilePhoto = document.getElementById('profilePhoto');
-    if (currentUser.photoUrl) {
-        profilePhoto.src = currentUser.photoUrl;
-    } else {
-        profilePhoto.src = 'default-profile.jpeg';
+    if (profilePhoto) {
+        if (currentUser.photoUrl) {
+            profilePhoto.src = currentUser.photoUrl;
+        } else {
+            profilePhoto.src = 'default-profile.jpeg';
+        }
     }
 
     modalContent.appendChild(closeButton);
