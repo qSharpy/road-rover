@@ -15,7 +15,7 @@ from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.82-fix profile save"
+BACKEND_VERSION = "0.83-fix profile save"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -231,7 +231,7 @@ async def update_profile(username: str, profile_update: ProfileUpdate, db: Async
         if profile_update.email is not None:
             update_fields.append("email = :email")
             params["email"] = profile_update.email
-        if profile_update.password is not None:
+        if profile_update.password is not None and profile_update.password.strip() != "":
             hashed_password = get_password_hash(profile_update.password)
             update_fields.append("hashed_password = :hashed_password")
             params["hashed_password"] = hashed_password
