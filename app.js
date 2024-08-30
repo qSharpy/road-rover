@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.100-fix pothole profile fetch";
+const FRONTEND_VERSION = "0.101-add profile photo upload";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -539,7 +539,7 @@ function showProfilePage() {
 
     modalContent.innerHTML = `
         <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 20px; overflow: hidden; border-radius: 50%;">
-            <img src="${currentUser.photoUrl || 'default-profile.jpeg'}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+            <img id="profilePhoto" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         <h2 style="margin-bottom: 20px;" id="usernameDisplay">Loading...</h2>
         <div style="display: flex; justify-content: space-around; margin-bottom: 30px;">
@@ -557,8 +557,8 @@ function showProfilePage() {
             </div>
         </div>
         <div style="text-align: left; margin-bottom: 20px;">
-            <label for="profilePhoto">URL catre poza ta de profil:</label>
-            <input type="text" id="profilePhoto" value="${currentUser.photoUrl || ''}" style="width: 100%; padding: 5px; margin-top: 5px;">
+            <label for="photoUpload">Upload Profile Photo:</label>
+            <input type="file" id="photoUpload" accept="image/*" style="width: 100%; padding: 5px; margin-top: 5px;">
         </div>
         <div style="text-align: left; margin-bottom: 20px;">
             <label for="email">Email:</label>
@@ -571,6 +571,14 @@ function showProfilePage() {
         <button id="saveProfile" style="width: 100%; padding: 10px; background-color: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">Save Changes</button>
         <button id="logoutButton" style="width: 100%; padding: 10px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
     `;
+
+    // Display user's profile photo
+    const profilePhoto = document.getElementById('profilePhoto');
+    if (currentUser.photoUrl) {
+        profilePhoto.src = currentUser.photoUrl;
+    } else {
+        profilePhoto.src = 'default-profile.jpeg';
+    }
 
     modalContent.appendChild(closeButton);
     modal.appendChild(modalContent);
@@ -624,25 +632,28 @@ async function fetchPotholeStats() {
 }
 
 async function saveProfileChanges() {
-    const photoUrl = document.getElementById('profilePhoto').value;
+    const photoUpload = document.getElementById('photoUpload');
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+
+    const formData = new FormData();
+    if (photoUpload.files.length > 0) {
+        formData.append('photo', photoUpload.files[0]);
+    }
+    formData.append('email', email);
+    formData.append('password', password);
 
     try {
         const response = await fetch(`https://road-rover.gris.ninja/api/update-profile/${currentUser.username}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ photoUrl, email, password })
+            body: formData
         });
 
         if (response.ok) {
             const result = await response.json();
             alert(result.message || 'Profile updated successfully');
-            // Update the currentUser object with the new data
-            currentUser.photoUrl = photoUrl;
-            currentUser.email = email;
+            // Refresh the profile page to show updated photo
+            showProfilePage();
         } else {
             const errorData = await response.json();
             alert(errorData.detail || 'Failed to update profile');

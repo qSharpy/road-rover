@@ -1,5 +1,6 @@
 import logging
 from fastapi import FastAPI, HTTPException, Depends, Header, status
+from fastapi import UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -15,7 +16,7 @@ from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.83-fix profile save"
+BACKEND_VERSION = "0.84- profile photo upload"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -37,6 +38,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    photo_binary = Column(LargeBinary)
 
 # Define Pothole model
 class Pothole(Base):
@@ -92,7 +94,6 @@ class UserCreate(BaseModel):
     email: str
     password: str
 class ProfileUpdate(BaseModel):
-    photoUrl: str = None
     email: str = None
     password: str = None
 class UserLogin(BaseModel):
@@ -216,7 +217,7 @@ async def get_user_stats(username: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/api/update-profile/{username}")
-async def update_profile(username: str, profile_update: ProfileUpdate, db: AsyncSession = Depends(get_db)):
+async def update_profile(username: str, photo: UploadFile = File(None), email: str = Form(None), password: str = Form(None), db: AsyncSession = Depends(get_db)):
     try:
         query = await db.execute("SELECT * FROM users WHERE username = :username", {"username": username})
         user = query.first()
@@ -225,14 +226,19 @@ async def update_profile(username: str, profile_update: ProfileUpdate, db: Async
 
         update_fields = []
         params = {}
-        if profile_update.photoUrl is not None:
-            update_fields.append("photo_url = :photo_url")
-            params["photo_url"] = profile_update.photoUrl
-        if profile_update.email is not None:
+        if photo is not None:
+            # Validate photo size
+            photo_bytes = await photo.read()
+            if len(photo_bytes) > 15 * 1024 * 1024:  # 15MB
+                raise HTTPException(status_code=400, detail="Photo size should not exceed 15MB")
+            
+            update_fields.append("photo_binary = :photo_binary")
+            params["photo_binary"] = photo_bytes
+        if email is not None:
             update_fields.append("email = :email")
-            params["email"] = profile_update.email
-        if profile_update.password is not None and profile_update.password.strip() != "":
-            hashed_password = get_password_hash(profile_update.password)
+            params["email"] = email
+        if password is not None and password.strip() != "":
+            hashed_password = get_password_hash(password)
             update_fields.append("hashed_password = :hashed_password")
             params["hashed_password"] = hashed_password
 
