@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.95-modal h3 fix";
+const FRONTEND_VERSION = "0.96-modal h3 fix";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -40,7 +40,7 @@ nightModeButton.style.bottom = '10px';
 nightModeButton.style.right = '10px';
 nightModeButton.style.padding = '5px 10px';
 nightModeButton.style.zIndex = '1000'; // Ensure the button is on top
-nightModeButton.textContent = 'Night Mode';
+nightModeButton.textContent = 'Mod Noapte';
 nightModeButton.addEventListener('click', () => {
     if (isNightMode) {
         map.removeLayer(nightTiles);
@@ -55,7 +55,7 @@ nightModeButton.addEventListener('click', () => {
         reCenterButton.style.color = 'black';
         toggleButton.style.backgroundColor = 'white';
         toggleButton.style.color = 'black';
-        nightModeButton.textContent = 'Night Mode';
+        nightModeButton.textContent = 'Mod Noapte';
 
         // Update burger menu options for day mode
         menuOptions.style.backgroundColor = 'white';
@@ -77,7 +77,7 @@ nightModeButton.addEventListener('click', () => {
         reCenterButton.style.color = 'white';
         toggleButton.style.backgroundColor = '#424242';
         toggleButton.style.color = 'white';
-        nightModeButton.textContent = 'Day Mode';
+        nightModeButton.textContent = 'Mod Zi';
 
         // Update burger menu options for night mode
         menuOptions.style.backgroundColor = '#424242';
@@ -97,7 +97,7 @@ reCenterButton.style.bottom = '50px';
 reCenterButton.style.right = '10px';
 reCenterButton.style.padding = '5px 10px';
 reCenterButton.style.zIndex = '1000'; // Ensure the button is on top
-reCenterButton.textContent = 'Re-center';
+reCenterButton.textContent = 'Re-centrare';
 reCenterButton.addEventListener('click', () => {
     shouldReCenter = true;
     userHasMovedMap = false;
@@ -410,10 +410,10 @@ async function signup(username, email, password) {
 // Update UI for logged in user
 function updateUIForLoggedInUser() {
     menuOptions.innerHTML = `
-        <div>Salut 👋🏼, ${currentUser.username}!</div>
-        <div id="viewProfileOption" style="cursor: pointer; margin-top: 5px;">View Profile</div>
-        <div id="viewLeaderboardOption" style="cursor: pointer; margin-top: 5px;">View Leaderboard</div>
-        <div id="logoutOption" style="cursor: pointer; margin-top: 5px;">Logout</div>
+        <div>👋🏼Salut, ${currentUser.username}!</div>
+        <div id="viewProfileOption" style="cursor: pointer; margin-top: 5px;">👤Profil</div>
+        <div id="viewLeaderboardOption" style="cursor: pointer; margin-top: 5px;">🏆Clasament</div>
+        <div id="logoutOption" style="cursor: pointer; margin-top: 5px;">⚠️Logout</div>
     `;
     document.getElementById('logoutOption').addEventListener('click', logout);
     document.getElementById('viewProfileOption').addEventListener('click', showProfilePage);
@@ -483,8 +483,8 @@ async function fetchLeaderboard() {
             <table style="width: 100%; max-width: 500px; margin: 0 auto; border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th style="padding: 10px; text-align: left; border-bottom: 2px solid ${isNightMode ? '#444' : '#ddd'};">Username 😎</th>
-                        <th style="padding: 10px; text-align: right; border-bottom: 2px solid ${isNightMode ? '#444' : '#ddd'};">nr. cratere 🚗</th>
+                        <th style="padding: 10px; text-align: left; border-bottom: 2px solid ${isNightMode ? '#444' : '#ddd'};">😎Sefii la asfalt </th>
+                        <th style="padding: 10px; text-align: right; border-bottom: 2px solid ${isNightMode ? '#444' : '#ddd'};">🌀nr. cratere</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -557,7 +557,7 @@ function showProfilePage() {
             </div>
         </div>
         <div style="text-align: left; margin-bottom: 20px;">
-            <label for="profilePhoto">Profile Photo URL:</label>
+            <label for="profilePhoto">URL catre poza ta de profil:</label>
             <input type="text" id="profilePhoto" value="${currentUser.photoUrl || ''}" style="width: 100%; padding: 5px; margin-top: 5px;">
         </div>
         <div style="text-align: left; margin-bottom: 20px;">
@@ -565,8 +565,8 @@ function showProfilePage() {
             <input type="email" id="email" value="${currentUser.email || ''}" style="width: 100%; padding: 5px; margin-top: 5px;">
         </div>
         <div style="text-align: left; margin-bottom: 20px;">
-            <label for="password">Password:</label>
-            <input type="password" id="password" placeholder="Enter new password" style="width: 100%; padding: 5px; margin-top: 5px;">
+            <label for="password">Vrei sa schimbi parola?</label>
+            <input type="password" id="password" placeholder="Introdu parola noua..." style="width: 100%; padding: 5px; margin-top: 5px;">
         </div>
         <button id="saveProfile" style="width: 100%; padding: 10px; background-color: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">Save Changes</button>
         <button id="logoutButton" style="width: 100%; padding: 10px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
