@@ -7,7 +7,8 @@ from pydantic import BaseModel
 from typing import List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, func, desc
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, func, desc, LargeBinary
+from sqlalchemy.types import LargeBinary
 from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 import math
@@ -16,7 +17,7 @@ from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.84- profile photo upload"
+BACKEND_VERSION = "0.85- profile photo upload"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
