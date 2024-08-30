@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.94-modal profile";
+const FRONTEND_VERSION = "0.95-modal h3 fix";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -545,15 +545,15 @@ function showProfilePage() {
         <div style="display: flex; justify-content: space-around; margin-bottom: 30px;">
             <div>
                 <h3 style="font-size: 24px; margin: 0;" id="last24hours">0</h3>
-                <p style="margin: 0;">last24hours</p>
-            </div>
-            <div>
-                <h3 style="font-size: 24px; margin: 0;" id="total">0</h3>
-                <p style="margin: 0;">total</p>
+                <p style="margin: 0;">24 ore</p>
             </div>
             <div>
                 <h3 style="font-size: 24px; margin: 0;" id="last30days">0</h3>
-                <p style="margin: 0;">last30days</p>
+                <p style="margin: 0;">30 zile</p>
+            </div>
+            <div>
+                <h3 style="font-size: 24px; margin: 0;" id="total">0</h3>
+                <p style="margin: 0;">Total</p>
             </div>
         </div>
         <div style="text-align: left; margin-bottom: 20px;">
