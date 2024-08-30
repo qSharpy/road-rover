@@ -13,7 +13,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.79-fix login"
+BACKEND_VERSION = "0.80-fix profile save"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -193,30 +193,35 @@ async def get_user_stats(username: str, db: AsyncSession = Depends(get_db)):
 @app.post("/api/update-profile/{username}")
 async def update_profile(username: str, profile_update: ProfileUpdate, db: AsyncSession = Depends(get_db)):
     try:
-        query = await db.execute(f"SELECT * FROM users WHERE username = '{username}'")
+        query = await db.execute("SELECT * FROM users WHERE username = :username", {"username": username})
         user = query.first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         update_fields = []
+        params = {}
         if profile_update.photoUrl is not None:
-            update_fields.append(f"photo_url = '{profile_update.photoUrl}'")
+            update_fields.append("photo_url = :photo_url")
+            params["photo_url"] = profile_update.photoUrl
         if profile_update.email is not None:
-            update_fields.append(f"email = '{profile_update.email}'")
+            update_fields.append("email = :email")
+            params["email"] = profile_update.email
         if profile_update.password is not None:
             hashed_password = get_password_hash(profile_update.password)
-            update_fields.append(f"hashed_password = '{hashed_password}'")
+            update_fields.append("hashed_password = :hashed_password")
+            params["hashed_password"] = hashed_password
 
         if update_fields:
-            update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE username = '{username}'"
-            await db.execute(update_query)
+            params["username"] = username
+            update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE username = :username"
+            await db.execute(update_query, params)
             await db.commit()
 
         return {"message": "Profile updated successfully"}
     except Exception as e:
         logger.error(f"Error updating profile: {str(e)}")
         await db.rollback()
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.get("/api/leaderboard")
 async def get_leaderboard(db: AsyncSession = Depends(get_db)):

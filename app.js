@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.98-fix backend fetch";
+const FRONTEND_VERSION = "0.99-fix profile save";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -629,7 +629,7 @@ async function saveProfileChanges() {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch(`https://road-rover.gris.ninja/api/update-profile/${currentUser}`, {
+        const response = await fetch(`https://road-rover.gris.ninja/api/update-profile/${currentUser.username}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -638,7 +638,11 @@ async function saveProfileChanges() {
         });
 
         if (response.ok) {
-            alert('Profile updated successfully');
+            const result = await response.json();
+            alert(result.message || 'Profile updated successfully');
+            // Update the currentUser object with the new data
+            currentUser.photoUrl = photoUrl;
+            currentUser.email = email;
         } else {
             const errorData = await response.json();
             alert(errorData.detail || 'Failed to update profile');
