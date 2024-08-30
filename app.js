@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.93-modal profile";
+const FRONTEND_VERSION = "0.94-modal profile";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -788,8 +788,8 @@ function closeModal(modal) {
 }
 
 async function postAccelerometerData() {
-    if (!currentUser) {
-        console.log("User not logged in. Data not sent.");
+    if (!currentUser || !currentUser.username) {
+        console.log("User not logged in or username not available. Data not sent.");
         return;
     }
     try {
@@ -799,7 +799,7 @@ async function postAccelerometerData() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-User': currentUser
+                'X-User': currentUser.username
             },
             body: JSON.stringify(accelerometerData)
         });
