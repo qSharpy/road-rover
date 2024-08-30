@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.96-modal h3 fix";
+const FRONTEND_VERSION = "0.97-fix backend fetch";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -593,7 +593,9 @@ function showProfilePage() {
 // Add this function to fetch and display user stats
 async function fetchUserStats() {
     try {
-        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser.username}`);
+        // Make sure currentUser.username is a string
+        const username = currentUser.username || '';
+        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${encodeURIComponent(username)}`);
         const stats = await response.json();
         
         document.getElementById('usernameDisplay').textContent = stats.username;
@@ -607,7 +609,9 @@ async function fetchUserStats() {
 
 async function fetchPotholeStats() {
     try {
-        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser}`);
+        // Make sure currentUser.username is a string
+        const username = currentUser.username || '';
+        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${encodeURIComponent(username)}`);
         const stats = await response.json();
         
         // Update the UI with the fetched stats
