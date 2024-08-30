@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.104-add profile photo upload";
+const FRONTEND_VERSION = "0.105-add profile photo upload";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -374,7 +374,6 @@ async function login(email, password) {
                 username: data.username,
                 email: email
             };
-            alert(`Welcome back, ${currentUser.username}!`);
             updateUIForLoggedInUser();
         } else {
             alert(data.detail || 'Login failed');
