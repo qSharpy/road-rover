@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.83-leaderboard";
+const FRONTEND_VERSION = "0.84-leaderboard";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -463,9 +463,22 @@ async function fetchLeaderboard() {
         const leaderboard = await response.json();
         const leaderboardList = document.getElementById('leaderboardList');
         leaderboardList.innerHTML = `
-            <ol>
-                ${leaderboard.map(user => `<li>${user.username} - ${user.pothole_count} potholes</li>`).join('')}
-            </ol>
+            <table style="width: 100%; max-width: 500px; margin: 0 auto; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Username 😎</th>
+                        <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;">nr. cratere 🚗</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${leaderboard.map(user => `
+                        <tr>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${user.username}</td>
+                            <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${user.pothole_count}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
         `;
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
