@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.85-leaderboard";
+const FRONTEND_VERSION = "0.86-modal";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -595,25 +595,93 @@ function logout() {
 
 // Setup event listeners for auth options
 function setupAuthEventListeners() {
-    document.getElementById('loginOption').addEventListener('click', () => {
-        const email = prompt('Enter your email:');
-        const password = prompt('Enter your password:');
+    document.getElementById('loginOption').addEventListener('click', showLoginModal);
+    document.getElementById('signupOption').addEventListener('click', showSignupModal);
+}
+
+setupAuthEventListeners();
+
+function showLoginModal() {
+    const modal = createModal('Login', `
+        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+        <button id="loginSubmit">Login</button>
+    `);
+
+    document.getElementById('loginSubmit').addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
         if (email && password) {
             login(email, password);
-        }
-    });
-
-    document.getElementById('signupOption').addEventListener('click', () => {
-        const username = prompt('Choose a username:');
-        const email = prompt('Enter your email:');
-        const password = prompt('Choose a password:');
-        if (username && email && password) {
-            signup(username, email, password);
+            closeModal(modal);
         }
     });
 }
 
-setupAuthEventListeners();
+function showSignupModal() {
+    const modal = createModal('Sign Up', `
+        <input type="text" id="signupUsername" placeholder="Choose a username" required>
+        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+        <input type="password" id="signupPassword" placeholder="Choose a password" required>
+        <button id="signupSubmit">Sign Up</button>
+    `);
+
+    document.getElementById('signupSubmit').addEventListener('click', () => {
+        const username = document.getElementById('signupUsername').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        if (username && email && password) {
+            signup(username, email, password);
+            closeModal(modal);
+        }
+    });
+}
+
+function createModal(title, content) {
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '2000';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.backgroundColor = '#fff';
+    modalContent.style.padding = '20px';
+    modalContent.style.borderRadius = '5px';
+    modalContent.style.position = 'relative';
+    modalContent.style.width = '300px';
+
+    const closeButton = document.createElement('span');
+    closeButton.textContent = '✕';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.addEventListener('click', () => closeModal(modal));
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = title;
+
+    modalContent.innerHTML = `
+        ${titleElement.outerHTML}
+        ${content}
+    `;
+    modalContent.appendChild(closeButton);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    return modal;
+}
+
+function closeModal(modal) {
+    document.body.removeChild(modal);
+}
 
 async function postAccelerometerData() {
     if (!currentUser) {
