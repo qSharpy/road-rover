@@ -343,19 +343,19 @@ burgerMenu.addEventListener('click', () => {
 });
 
 // Login function
-async function login(username, password) {
+async function login(email, password) {
     try {
         const response = await fetch('https://road-rover.gris.ninja/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ email, password })
         });
         const data = await response.json();
         if (response.ok) {
-            currentUser = username;
-            alert(`Welcome back, ${username}!`);
+            currentUser = data.username;
+            alert(`Welcome back, ${currentUser}!`);
             updateUIForLoggedInUser();
         } else {
             alert(data.detail || 'Login failed');
@@ -367,14 +367,14 @@ async function login(username, password) {
 }
 
 // Sign up function
-async function signup(username, password) {
+async function signup(username, email, password) {
     try {
         const response = await fetch('https://road-rover.gris.ninja/api/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, email, password })
         });
         const data = await response.json();
         if (response.ok) {
@@ -411,18 +411,19 @@ function logout() {
 // Setup event listeners for auth options
 function setupAuthEventListeners() {
     document.getElementById('loginOption').addEventListener('click', () => {
-        const username = prompt('Enter your username:');
+        const email = prompt('Enter your email:');
         const password = prompt('Enter your password:');
-        if (username && password) {
-            login(username, password);
+        if (email && password) {
+            login(email, password);
         }
     });
 
     document.getElementById('signupOption').addEventListener('click', () => {
         const username = prompt('Choose a username:');
+        const email = prompt('Enter your email:');
         const password = prompt('Choose a password:');
-        if (username && password) {
-            signup(username, password);
+        if (username && email && password) {
+            signup(username, email, password);
         }
     });
 }
