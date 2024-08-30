@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.82 add profile section fix night mode";
+const FRONTEND_VERSION = "0.83-leaderboard";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -409,10 +409,68 @@ function updateUIForLoggedInUser() {
     menuOptions.innerHTML = `
         <div>Logged in as ${currentUser}</div>
         <div id="viewProfileOption" style="cursor: pointer; margin-top: 5px;">View Profile</div>
+        <div id="viewLeaderboardOption" style="cursor: pointer; margin-top: 5px;">View Leaderboard</div>
         <div id="logoutOption" style="cursor: pointer; margin-top: 5px;">Logout</div>
     `;
     document.getElementById('logoutOption').addEventListener('click', logout);
     document.getElementById('viewProfileOption').addEventListener('click', showProfilePage);
+    document.getElementById('viewLeaderboardOption').addEventListener('click', showLeaderboardPage);
+}
+
+function showLeaderboardPage() {
+    const leaderboardOverlay = document.createElement('div');
+    leaderboardOverlay.style.position = 'fixed';
+    leaderboardOverlay.style.top = '0';
+    leaderboardOverlay.style.left = '0';
+    leaderboardOverlay.style.width = '100%';
+    leaderboardOverlay.style.height = '100%';
+    leaderboardOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+    leaderboardOverlay.style.zIndex = '2000';
+    leaderboardOverlay.style.overflow = 'auto';
+    leaderboardOverlay.style.padding = '20px';
+    leaderboardOverlay.style.boxSizing = 'border-box';
+
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '✕';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.background = 'none';
+    closeButton.style.border = 'none';
+    closeButton.style.cursor = 'pointer';
+    closeButton.addEventListener('click', () => document.body.removeChild(leaderboardOverlay));
+
+    const leaderboardContent = document.createElement('div');
+    leaderboardContent.innerHTML = `
+        <h2>Vanatorii de cratere</h2>
+        <img src="top-pothole.jpeg" alt="Top Pothole" style="max-width: 100%; height: auto; margin-bottom: 20px;">
+        <div id="leaderboardList">Loading...</div>
+    `;
+
+    leaderboardOverlay.appendChild(closeButton);
+    leaderboardOverlay.appendChild(leaderboardContent);
+    document.body.appendChild(leaderboardOverlay);
+
+    // Fetch and display leaderboard
+    fetchLeaderboard();
+}
+
+// Add this new function to fetch the leaderboard data
+async function fetchLeaderboard() {
+    try {
+        const response = await fetch('https://road-rover.gris.ninja/api/leaderboard');
+        const leaderboard = await response.json();
+        const leaderboardList = document.getElementById('leaderboardList');
+        leaderboardList.innerHTML = `
+            <ol>
+                ${leaderboard.map(user => `<li>${user.username} - ${user.pothole_count} potholes</li>`).join('')}
+            </ol>
+        `;
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        document.getElementById('leaderboardList').textContent = 'Failed to load leaderboard';
+    }
 }
 
 function showProfilePage() {

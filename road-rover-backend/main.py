@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, func
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, func, desc
 from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 import math
@@ -13,7 +13,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.75 login signup"
+BACKEND_VERSION = "0.76-leaderboard"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -201,6 +201,24 @@ async def update_profile(username: str, profile_update: ProfileUpdate, db: Async
     except Exception as e:
         logger.error(f"Error updating profile: {str(e)}")
         await db.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/api/leaderboard")
+async def get_leaderboard(db: AsyncSession = Depends(get_db)):
+    try:
+        query = """
+        SELECT u.username, COUNT(p.id) as pothole_count
+        FROM users u
+        LEFT JOIN potholes p ON u.id = p.user_id
+        GROUP BY u.id
+        ORDER BY pothole_count DESC
+        LIMIT 10
+        """
+        result = await db.execute(query)
+        leaderboard = [{"username": row[0], "pothole_count": row[1]} for row in result.fetchall()]
+        return leaderboard
+    except Exception as e:
+        logger.error(f"Error fetching leaderboard: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/api/accelerometer-data")
