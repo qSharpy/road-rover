@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.99-fix profile save";
+const FRONTEND_VERSION = "0.100-fix pothole profile fetch";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -616,8 +616,8 @@ async function fetchPotholeStats() {
         
         // Update the UI with the fetched stats
         document.querySelector('div:nth-child(2) h3').textContent = stats.last24Hours;
-        document.querySelector('div:nth-child(3) h3').textContent = stats.total;
-        document.querySelector('div:nth-child(4) h3').textContent = stats.last30Days;
+        document.querySelector('div:nth-child(3) h3').textContent = stats.last30Days;
+        document.querySelector('div:nth-child(4) h3').textContent = stats.total;
     } catch (error) {
         console.error('Error fetching pothole stats:', error);
     }
