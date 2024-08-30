@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.102-add profile photo upload";
+const FRONTEND_VERSION = "0.103-add profile photo upload";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
