@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.84-leaderboard";
+const FRONTEND_VERSION = "0.85-leaderboard";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -407,7 +407,7 @@ async function signup(username, email, password) {
 // Update UI for logged in user
 function updateUIForLoggedInUser() {
     menuOptions.innerHTML = `
-        <div>Logged in as ${currentUser}</div>
+        <div>Salut 👋🏼, ${currentUser}!</div>
         <div id="viewProfileOption" style="cursor: pointer; margin-top: 5px;">View Profile</div>
         <div id="viewLeaderboardOption" style="cursor: pointer; margin-top: 5px;">View Leaderboard</div>
         <div id="logoutOption" style="cursor: pointer; margin-top: 5px;">Logout</div>
