@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.90-modal leaderboard";
+const FRONTEND_VERSION = "0.91-modal leaderboard";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -587,7 +587,7 @@ function showProfilePage() {
 
 async function fetchPotholeStats() {
     try {
-        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser.username}`);
+        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser}`);
         const stats = await response.json();
         
         // Update the UI with the fetched stats

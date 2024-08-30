@@ -1,4 +1,4 @@
-const CACHE_NAME = '0.102';
+const CACHE_NAME = '0.103';
 const SCOPE = '/road-rover/';
 
 self.addEventListener('install', (event) => {
