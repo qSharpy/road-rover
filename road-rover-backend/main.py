@@ -18,7 +18,7 @@ from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.89 fix modal loading twice"
+BACKEND_VERSION = "0.91 fix modal loading twice"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
