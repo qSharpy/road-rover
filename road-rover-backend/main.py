@@ -13,7 +13,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.74 login signup"
+BACKEND_VERSION = "0.75 login signup"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
