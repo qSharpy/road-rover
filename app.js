@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.92-modal profile";
+const FRONTEND_VERSION = "0.93-modal profile";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -410,7 +410,7 @@ async function signup(username, email, password) {
 // Update UI for logged in user
 function updateUIForLoggedInUser() {
     menuOptions.innerHTML = `
-        <div>Salut 👋🏼, ${currentUser}!</div>
+        <div>Salut 👋🏼, ${currentUser.username}!</div>
         <div id="viewProfileOption" style="cursor: pointer; margin-top: 5px;">View Profile</div>
         <div id="viewLeaderboardOption" style="cursor: pointer; margin-top: 5px;">View Leaderboard</div>
         <div id="logoutOption" style="cursor: pointer; margin-top: 5px;">Logout</div>
@@ -524,15 +524,16 @@ function showProfilePage() {
     modalContent.style.width = '90%';
     modalContent.style.maxWidth = '400px';
     modalContent.style.textAlign = 'center';
+    modalContent.style.position = 'relative';  // Add this line
 
     const closeButton = document.createElement('button');
     closeButton.textContent = '✕';
     closeButton.style.position = 'absolute';
     closeButton.style.top = '10px';
     closeButton.style.right = '10px';
-    closeButton.style.fontSize = '24px';
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
+    closeButton.style.fontSize = '20px';
     closeButton.style.cursor = 'pointer';
     closeButton.addEventListener('click', () => document.body.removeChild(modal));
 
