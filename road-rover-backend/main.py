@@ -13,7 +13,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.76-leaderboard"
+BACKEND_VERSION = "0.77-profile"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -167,6 +167,7 @@ async def get_user_stats(username: str, db: AsyncSession = Depends(get_db)):
         total = await db.execute(f"SELECT COUNT(*) FROM potholes WHERE user_id = {user_id}")
 
         return {
+            "username": username,
             "last24Hours": last_24_hours.scalar(),
             "last30Days": last_30_days.scalar(),
             "total": total.scalar()

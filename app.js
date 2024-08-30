@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.91-modal leaderboard";
+const FRONTEND_VERSION = "0.92-modal profile";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -370,8 +370,11 @@ async function login(email, password) {
         });
         const data = await response.json();
         if (response.ok) {
-            currentUser = data.username;
-            alert(`Welcome back, ${currentUser}!`);
+            currentUser = {
+                username: data.username,
+                email: email
+            };
+            alert(`Welcome back, ${currentUser.username}!`);
             updateUIForLoggedInUser();
         } else {
             alert(data.detail || 'Login failed');
@@ -535,20 +538,20 @@ function showProfilePage() {
 
     modalContent.innerHTML = `
         <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 20px; overflow: hidden; border-radius: 50%;">
-            <img src="${currentUser.photoUrl || ''}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="${currentUser.photoUrl || 'default-profile.jpg'}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <h2 style="margin-bottom: 20px;">${currentUser.username}</h2>
+        <h2 style="margin-bottom: 20px;" id="usernameDisplay">Loading...</h2>
         <div style="display: flex; justify-content: space-around; margin-bottom: 30px;">
             <div>
-                <h3 style="font-size: 24px; margin: 0;">${currentUser.last24hours || 0}</h3>
+                <h3 style="font-size: 24px; margin: 0;" id="last24hours">0</h3>
                 <p style="margin: 0;">last24hours</p>
             </div>
             <div>
-                <h3 style="font-size: 24px; margin: 0;">${currentUser.total || 0}</h3>
+                <h3 style="font-size: 24px; margin: 0;" id="total">0</h3>
                 <p style="margin: 0;">total</p>
             </div>
             <div>
-                <h3 style="font-size: 24px; margin: 0;">${currentUser.last30days || 0}</h3>
+                <h3 style="font-size: 24px; margin: 0;" id="last30days">0</h3>
                 <p style="margin: 0;">last30days</p>
             </div>
         </div>
@@ -583,6 +586,22 @@ function showProfilePage() {
 
     // Fetch and display pothole statistics
     fetchPotholeStats();
+    fetchUserStats();
+}
+
+// Add this function to fetch and display user stats
+async function fetchUserStats() {
+    try {
+        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser.username}`);
+        const stats = await response.json();
+        
+        document.getElementById('usernameDisplay').textContent = stats.username;
+        document.getElementById('last24hours').textContent = stats.last24Hours;
+        document.getElementById('total').textContent = stats.total;
+        document.getElementById('last30days').textContent = stats.last30Days;
+    } catch (error) {
+        console.error('Error fetching user stats:', error);
+    }
 }
 
 async function fetchPotholeStats() {
