@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.89-modal leaderboard";
+const FRONTEND_VERSION = "0.90-modal leaderboard";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -501,17 +501,26 @@ async function fetchLeaderboard() {
 }
 
 function showProfilePage() {
-    const profileOverlay = document.createElement('div');
-    profileOverlay.style.position = 'fixed';
-    profileOverlay.style.top = '0';
-    profileOverlay.style.left = '0';
-    profileOverlay.style.width = '100%';
-    profileOverlay.style.height = '100%';
-    profileOverlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
-    profileOverlay.style.zIndex = '2000';
-    profileOverlay.style.overflow = 'auto';
-    profileOverlay.style.padding = '20px';
-    profileOverlay.style.boxSizing = 'border-box';
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '2000';
+
+    const modalContent = document.createElement('div');
+    modalContent.style.backgroundColor = 'white';
+    modalContent.style.padding = '30px';
+    modalContent.style.borderRadius = '20px';
+    modalContent.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    modalContent.style.width = '90%';
+    modalContent.style.maxWidth = '400px';
+    modalContent.style.textAlign = 'center';
 
     const closeButton = document.createElement('button');
     closeButton.textContent = '✕';
@@ -522,51 +531,71 @@ function showProfilePage() {
     closeButton.style.background = 'none';
     closeButton.style.border = 'none';
     closeButton.style.cursor = 'pointer';
-    closeButton.addEventListener('click', () => document.body.removeChild(profileOverlay));
+    closeButton.addEventListener('click', () => document.body.removeChild(modal));
 
-    const profileContent = document.createElement('div');
-    profileContent.innerHTML = `
-        <h2>Profile: ${currentUser}</h2>
-        <div>
+    modalContent.innerHTML = `
+        <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 20px; overflow: hidden; border-radius: 50%;">
+            <img src="${currentUser.photoUrl || ''}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <h2 style="margin-bottom: 20px;">${currentUser.username}</h2>
+        <div style="display: flex; justify-content: space-around; margin-bottom: 30px;">
+            <div>
+                <h3 style="font-size: 24px; margin: 0;">${currentUser.last24hours || 0}</h3>
+                <p style="margin: 0;">last24hours</p>
+            </div>
+            <div>
+                <h3 style="font-size: 24px; margin: 0;">${currentUser.total || 0}</h3>
+                <p style="margin: 0;">total</p>
+            </div>
+            <div>
+                <h3 style="font-size: 24px; margin: 0;">${currentUser.last30days || 0}</h3>
+                <p style="margin: 0;">last30days</p>
+            </div>
+        </div>
+        <div style="text-align: left; margin-bottom: 20px;">
             <label for="profilePhoto">Profile Photo URL:</label>
-            <input type="text" id="profilePhoto" placeholder="Enter photo URL">
+            <input type="text" id="profilePhoto" value="${currentUser.photoUrl || ''}" style="width: 100%; padding: 5px; margin-top: 5px;">
         </div>
-        <div>
+        <div style="text-align: left; margin-bottom: 20px;">
             <label for="email">Email:</label>
-            <input type="email" id="email" placeholder="Enter new email">
+            <input type="email" id="email" value="${currentUser.email || ''}" style="width: 100%; padding: 5px; margin-top: 5px;">
         </div>
-        <div>
+        <div style="text-align: left; margin-bottom: 20px;">
             <label for="password">Password:</label>
-            <input type="password" id="password" placeholder="Enter new password">
+            <input type="password" id="password" placeholder="Enter new password" style="width: 100%; padding: 5px; margin-top: 5px;">
         </div>
-        <button id="saveProfile">Save Changes</button>
-        <h3>Pothole Statistics</h3>
-        <div id="potholeStats">Loading...</div>
+        <button id="saveProfile" style="width: 100%; padding: 10px; background-color: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">Save Changes</button>
+        <button id="logoutButton" style="width: 100%; padding: 10px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">Logout</button>
     `;
 
-    profileOverlay.appendChild(closeButton);
-    profileOverlay.appendChild(profileContent);
-    document.body.appendChild(profileOverlay);
-
-    // Fetch and display pothole statistics
-    fetchPotholeStats();
+    modalContent.appendChild(closeButton);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
 
     // Add event listener for saving profile changes
     document.getElementById('saveProfile').addEventListener('click', saveProfileChanges);
+
+    // Add event listener for logout
+    document.getElementById('logoutButton').addEventListener('click', () => {
+        logout();
+        document.body.removeChild(modal);
+    });
+
+    // Fetch and display pothole statistics
+    fetchPotholeStats();
 }
 
 async function fetchPotholeStats() {
     try {
-        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser}`);
+        const response = await fetch(`https://road-rover.gris.ninja/api/user-stats/${currentUser.username}`);
         const stats = await response.json();
-        document.getElementById('potholeStats').innerHTML = `
-            <p>Last 24 hours: ${stats.last24Hours}</p>
-            <p>Last 30 days: ${stats.last30Days}</p>
-            <p>Total: ${stats.total}</p>
-        `;
+        
+        // Update the UI with the fetched stats
+        document.querySelector('div:nth-child(2) h3').textContent = stats.last24Hours;
+        document.querySelector('div:nth-child(3) h3').textContent = stats.total;
+        document.querySelector('div:nth-child(4) h3').textContent = stats.last30Days;
     } catch (error) {
         console.error('Error fetching pothole stats:', error);
-        document.getElementById('potholeStats').textContent = 'Failed to load statistics';
     }
 }
 
