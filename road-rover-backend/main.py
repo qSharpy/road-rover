@@ -13,7 +13,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.78-fix login"
+BACKEND_VERSION = "0.79-fix login"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -143,17 +143,23 @@ async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
 @app.post("/api/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     try:
-        query = await db.execute(f"SELECT id, username, email, hashed_password FROM users WHERE email = :email", {"email": user.email})
+        logger.debug(f"Attempting login for email: {user.email}")
+        query = await db.execute("SELECT id, username, email, hashed_password FROM users WHERE email = :email", {"email": user.email})
+        logger.debug("Query executed")
         db_user = query.first()
+        logger.debug(f"User found: {db_user is not None}")
         if not db_user:
             raise HTTPException(status_code=400, detail="Incorrect email or password")
         
+        logger.debug("Verifying password")
         if not verify_password(user.password, db_user.hashed_password):
             raise HTTPException(status_code=400, detail="Incorrect email or password")
         
+        logger.debug("Login successful")
         return {"message": "Login successful", "username": db_user.username}
     except Exception as e:
-        logger.error(f"Login error: {str(e)}")
+        logger.error(f"Login error: {type(e).__name__}, {str(e)}")
+        logger.exception("Full traceback:")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/user-stats/{username}")
