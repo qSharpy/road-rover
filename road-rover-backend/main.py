@@ -12,12 +12,13 @@ from sqlalchemy.types import LargeBinary
 from geoalchemy2 import Geometry
 from datetime import datetime, timedelta
 import math
+import io
 from dateutil import parser
 from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.87- profile photo upload"
+BACKEND_VERSION = "0.88- profile photo upload"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
