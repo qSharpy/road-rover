@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.86-modal";
+const FRONTEND_VERSION = "0.87-modal beautiful";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -602,17 +602,17 @@ function setupAuthEventListeners() {
 setupAuthEventListeners();
 
 function showLoginModal() {
-    const modal = createModal('Login', `
-        <input type="email" id="loginEmail" placeholder="Enter your email" required>
-        <input type="password" id="loginPassword" placeholder="Enter your password" required>
-        <button id="loginSubmit">Login</button>
+    const modal = createModal('Sign In', `
+        <input type="text" id="loginUsername" placeholder="Username" required class="modal-input">
+        <input type="password" id="loginPassword" placeholder="Password" required class="modal-input">
+        <button id="loginSubmit" class="modal-submit">Sign In</button>
     `);
 
     document.getElementById('loginSubmit').addEventListener('click', () => {
-        const email = document.getElementById('loginEmail').value;
+        const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
-        if (email && password) {
-            login(email, password);
+        if (username && password) {
+            login(username, password);
             closeModal(modal);
         }
     });
@@ -620,10 +620,10 @@ function showLoginModal() {
 
 function showSignupModal() {
     const modal = createModal('Sign Up', `
-        <input type="text" id="signupUsername" placeholder="Choose a username" required>
-        <input type="email" id="signupEmail" placeholder="Enter your email" required>
-        <input type="password" id="signupPassword" placeholder="Choose a password" required>
-        <button id="signupSubmit">Sign Up</button>
+        <input type="text" id="signupUsername" placeholder="Choose a username" required class="modal-input">
+        <input type="email" id="signupEmail" placeholder="Enter your email" required class="modal-input">
+        <input type="password" id="signupPassword" placeholder="Choose a password" required class="modal-input">
+        <button id="signupSubmit" class="modal-submit">Sign Up</button>
     `);
 
     document.getElementById('signupSubmit').addEventListener('click', () => {
@@ -652,21 +652,29 @@ function createModal(title, content) {
 
     const modalContent = document.createElement('div');
     modalContent.style.backgroundColor = '#fff';
-    modalContent.style.padding = '20px';
-    modalContent.style.borderRadius = '5px';
+    modalContent.style.padding = '30px';
+    modalContent.style.borderRadius = '8px';
+    modalContent.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
     modalContent.style.position = 'relative';
     modalContent.style.width = '300px';
+    modalContent.style.maxWidth = '90%';
 
     const closeButton = document.createElement('span');
-    closeButton.textContent = '✕';
+    closeButton.textContent = '×';
     closeButton.style.position = 'absolute';
     closeButton.style.top = '10px';
-    closeButton.style.right = '10px';
+    closeButton.style.right = '15px';
+    closeButton.style.fontSize = '24px';
     closeButton.style.cursor = 'pointer';
+    closeButton.style.color = '#999';
     closeButton.addEventListener('click', () => closeModal(modal));
 
     const titleElement = document.createElement('h2');
     titleElement.textContent = title;
+    titleElement.style.marginTop = '0';
+    titleElement.style.marginBottom = '20px';
+    titleElement.style.textAlign = 'center';
+    titleElement.style.color = '#333';
 
     modalContent.innerHTML = `
         ${titleElement.outerHTML}
@@ -675,6 +683,39 @@ function createModal(title, content) {
     modalContent.appendChild(closeButton);
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
+
+    // Add CSS for input fields and button
+    const style = document.createElement('style');
+    style.textContent = `
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .modal-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+        .modal-submit {
+            width: 100%;
+            padding: 10px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .modal-submit:hover {
+            background-color: #357ae8;
+        }
+    `;
+    document.head.appendChild(style);
 
     return modal;
 }
