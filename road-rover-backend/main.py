@@ -13,7 +13,7 @@ from dateutil import parser
 from passlib.context import CryptContext
 
 # Define version number
-BACKEND_VERSION = "0.77-profile"
+BACKEND_VERSION = "0.78-fix login"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -142,11 +142,19 @@ async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
 @app.post("/api/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
-    query = await db.execute(f"SELECT * FROM users WHERE email = '{user.email}'")
-    db_user = query.first()
-    if not db_user or not verify_password(user.password, db_user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    return {"message": "Login successful", "username": db_user.username}
+    try:
+        query = await db.execute(f"SELECT id, username, email, hashed_password FROM users WHERE email = :email", {"email": user.email})
+        db_user = query.first()
+        if not db_user:
+            raise HTTPException(status_code=400, detail="Incorrect email or password")
+        
+        if not verify_password(user.password, db_user.hashed_password):
+            raise HTTPException(status_code=400, detail="Incorrect email or password")
+        
+        return {"message": "Login successful", "username": db_user.username}
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/user-stats/{username}")
 async def get_user_stats(username: str, db: AsyncSession = Depends(get_db)):
