@@ -18,7 +18,7 @@ from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.88- profile photo upload"
+BACKEND_VERSION = "0.89 fix modal loading twice"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -254,6 +254,23 @@ async def update_profile(username: str, photo: UploadFile = File(None), email: s
         logger.error(f"Error updating profile: {str(e)}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+@app.get("/api/user-data/{username}")
+async def get_user_data(username: str, db: AsyncSession = Depends(get_db)):
+    try:
+        query = await db.execute("SELECT email FROM users WHERE username = :username", {"username": username})
+        user = query.first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return {
+            "username": username,
+            "email": user.email,
+            "photoUrl": f"/api/profile-photo/{username}"
+        }
+    except Exception as e:
+        logger.error(f"Error fetching user data: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/leaderboard")
 async def get_leaderboard(db: AsyncSession = Depends(get_db)):

@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.105-add profile photo upload";
+const FRONTEND_VERSION = "0.106 fix modal loading twice";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -666,8 +666,9 @@ async function saveProfileChanges() {
         if (response.ok) {
             const result = await response.json();
             alert(result.message || 'Profile updated successfully');
-            // Refresh the profile page to show updated photo
-            showProfilePage();
+            // Remove the call to showProfilePage here
+            // Instead, update the current modal content
+            updateProfileModalContent();
         } else {
             const errorData = await response.json();
             alert(errorData.detail || 'Failed to update profile');
@@ -675,6 +676,46 @@ async function saveProfileChanges() {
     } catch (error) {
         console.error('Error updating profile:', error);
         alert('An error occurred while updating the profile');
+    }
+}
+
+// Add this new function to update the modal content
+async function updateProfileModalContent() {
+    const profilePhoto = document.getElementById('profilePhoto');
+    const emailInput = document.getElementById('email');
+    
+    // Fetch updated user data
+    const userData = await fetchUserData(currentUser.username);
+    
+    // Update profile photo
+    if (userData.photoUrl) {
+        profilePhoto.src = userData.photoUrl;
+    }
+    
+    // Update email input
+    if (userData.email) {
+        emailInput.value = userData.email;
+    }
+    
+    // Clear password input
+    document.getElementById('password').value = '';
+    
+    // Refresh user stats
+    fetchUserStats();
+}
+
+async function fetchUserData(username) {
+    try {
+        const response = await fetch(`https://road-rover.gris.ninja/api/user-data/${username}`);
+        if (response.ok) {
+            return await response.json();
+        } else {
+            console.error('Failed to fetch user data');
+            return {};
+        }
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        return {};
     }
 }
 
