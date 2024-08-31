@@ -1,5 +1,4 @@
 import { showModal, closeModal, showProfileModal, showLeaderboardModal, updateUIForAuthStatus } from './ui.js';
-import { updateUIForAuthStatus } from './ui.js';
 
 let currentUser = null;
 
