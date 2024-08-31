@@ -25,13 +25,26 @@ function createAccelerometerButton() {
 export function updateUIForAuthStatus() {
     const currentUser = getCurrentUser();
     const accelerometerButton = document.getElementById('toggle-accelerometer');
+    const menuOptions = document.getElementById('menu-options');
 
     if (currentUser) {
         accelerometerButton.style.display = 'block';
-        // Update other UI elements for logged-in state
+        menuOptions.innerHTML = `
+            <div id="viewProfileOption">👤 Profile</div>
+            <div id="viewLeaderboardOption">🏆 Leaderboard</div>
+            <div id="logoutOption">⚠️ Logout</div>
+        `;
+        document.getElementById('viewProfileOption').addEventListener('click', showProfileModal);
+        document.getElementById('viewLeaderboardOption').addEventListener('click', showLeaderboardModal);
+        document.getElementById('logoutOption').addEventListener('click', handleLogout);
     } else {
         accelerometerButton.style.display = 'none';
-        // Update other UI elements for logged-out state
+        menuOptions.innerHTML = `
+            <div id="loginOption">Login</div>
+            <div id="signupOption">Sign Up</div>
+        `;
+        document.getElementById('loginOption').addEventListener('click', showLoginModal);
+        document.getElementById('signupOption').addEventListener('click', showSignupModal);
     }
 }
 
