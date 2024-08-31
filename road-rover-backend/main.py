@@ -18,7 +18,7 @@ from passlib.context import CryptContext
 import bcrypt
 
 # Define version number
-BACKEND_VERSION = "0.91 fix modal loading twice"
+BACKEND_VERSION = "0.92 fix modal loading twice"
 
 # Database setup
 DATABASE_URL = "postgresql+asyncpg://root:test@192.168.0.135/road_rover"
@@ -466,4 +466,3 @@ async def recalculate_potholes(db: AsyncSession = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error recalculating potholes: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error recalculating potholes: {str(e)}")
-
