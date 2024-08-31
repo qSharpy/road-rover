@@ -1,8 +1,7 @@
 import { getCurrentUser, setCurrentUser } from './auth.js';
 import { centerMapOnUser } from './map.js';
-import { updateProfileModalContent } from './ui.js';
-
-const API_BASE_URL = 'https://road-rover.gris.ninja/api';
+import { updateProfileModalContent, showProfileModal } from './ui.js';
+import { API_BASE_URL } from './config.js';
 
 export async function login(email, password) {
     try {

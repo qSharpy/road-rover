@@ -1,6 +1,7 @@
 import { toggleNightMode } from './map.js';
 import { getCurrentUser } from './auth.js';
 import { fetchLeaderboard, fetchUserStats, saveProfileChanges } from './api.js';
+import { API_BASE_URL } from './config.js';
 
 export function initializeUI() {
     createNightModeToggle();
@@ -96,7 +97,7 @@ export async function updateProfileModalContent() {
 
     profileContent.innerHTML = `
         <div class="profile-header">
-            <img id="profilePhoto" src="/api/profile-photo/${currentUser.username}" alt="Profile" onerror="this.src='default-profile.jpeg';">
+            <img id="profilePhoto" src="${API_BASE_URL}/profile-photo/${currentUser.username}" alt="Profile" onerror="this.src='default-profile.jpeg';">
             <h2>${stats.username}</h2>
         </div>
         <div class="profile-stats">
