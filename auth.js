@@ -1,4 +1,4 @@
-import { showModal, closeModal, showProfileModal, showLeaderboardModal } from './ui.js';
+import { showModal, closeModal, showProfileModal, showLeaderboardModal, updateUIForAuthStatus } from './ui.js';
 
 let currentUser = null;
 
@@ -17,7 +17,7 @@ export function setCurrentUser(user) {
     } else {
         localStorage.removeItem('currentUser');
     }
-    updateUIForUser(user);
+    updateUIForAuthStatus();
 }
 
 export function setupAuthEventListeners() {
@@ -102,5 +102,6 @@ function updateUIForUser(user) {
 export async function handleLogout() {
     const { logout } = await import('./api.js');
     await logout();
-    updateUIForUser(null);
+    setCurrentUser(null);
+    updateUIForAuthStatus();
 }

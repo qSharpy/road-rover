@@ -8,6 +8,31 @@ export function initializeUI() {
     createNightModeToggle();
     createBurgerMenu();
     createVersionDisplay();
+    createAccelerometerButton();
+    updateUIForAuthStatus();
+}
+
+function createAccelerometerButton() {
+    const controlsContainer = document.getElementById('controls');
+    const accelerometerButton = document.createElement('button');
+    accelerometerButton.id = 'toggle-accelerometer';
+    accelerometerButton.textContent = 'Start Accelerometer';
+    accelerometerButton.classList.add('control-button');
+    accelerometerButton.style.display = 'none'; // Initially hidden
+    controlsContainer.appendChild(accelerometerButton);
+}
+
+export function updateUIForAuthStatus() {
+    const currentUser = getCurrentUser();
+    const accelerometerButton = document.getElementById('toggle-accelerometer');
+
+    if (currentUser) {
+        accelerometerButton.style.display = 'block';
+        // Update other UI elements for logged-in state
+    } else {
+        accelerometerButton.style.display = 'none';
+        // Update other UI elements for logged-out state
+    }
 }
 
 function createNightModeToggle() {
