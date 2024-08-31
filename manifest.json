@@ -1,11 +1,12 @@
 {
   "name": "Road Rover",
   "short_name": "RoadRover",
+  "description": "Discover and report road issues in your area",
   "start_url": "/road-rover/",
   "scope": "/road-rover/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#4a90e2",
   "icons": [
     {
       "src": "/road-rover/icon.png",

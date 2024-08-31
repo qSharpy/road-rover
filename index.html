@@ -2,33 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road Rover PWA</title>
-    <link rel="manifest" href="/road-rover/manifest.json">
-    <link rel="icon" type="image/png" href="/road-rover/icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Road Rover</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <style>
-        #map { height: 400px; width: 100%; margin-bottom: 20px; }
-        #data pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; margin-top: 10px; }
-    </style>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/road-rover/sw.js', {scope: '/road-rover/'});
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="map"></div>
-
-<!-- New Section for Accelerometer Data -->
-<button id="toggle-accelerometer">Start Accelerometer</button>
-<div id="data">
-    <h3>Accelerometer Data:</h3>
-    <pre id="log">No data yet</pre>
+<div id="app">
+    <div id="map"></div>
+    <div id="controls">
+        <button id="toggle-accelerometer" class="control-button">
+            <i class="fas fa-running"></i>
+        </button>
+        <button id="recalculate-button" class="control-button">
+            <i class="fas fa-redo"></i>
+        </button>
+    </div>
+    <div id="version-display"></div>
 </div>
 
-<script src="/road-rover/app.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script type="module" src="main.js"></script>
 </body>
 </html>
