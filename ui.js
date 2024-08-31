@@ -1,6 +1,6 @@
 import { toggleNightMode } from './map.js';
-import { getCurrentUser } from './auth.js';
-import { fetchLeaderboard, fetchUserStats, saveProfileChanges } from './api.js';
+import { getCurrentUser, handleLogout, setCurrentUser } from './auth.js';
+import { fetchLeaderboard, fetchUserStats, saveProfileChanges, login, signup } from './api.js';
 import { API_BASE_URL } from './config.js';
 import { FRONTEND_VERSION } from './config.js';
 
@@ -46,6 +46,44 @@ export function updateUIForAuthStatus() {
         document.getElementById('loginOption').addEventListener('click', showLoginModal);
         document.getElementById('signupOption').addEventListener('click', showSignupModal);
     }
+}
+
+export function showLoginModal() {
+    const modal = showModal('Intra in cont', `
+        <input type="text" id="loginUsername" placeholder="Email" required class="modal-input">
+        <input type="password" id="loginPassword" placeholder="Parola" required class="modal-input">
+        <button id="loginSubmit" class="modal-submit">Conecteaza-te</button>
+    `);
+
+    document.getElementById('loginSubmit').addEventListener('click', async () => {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        if (username && password) {
+            await login(username, password);
+            closeModal(modal);
+            updateUIForAuthStatus();
+        }
+    });
+}
+
+export function showSignupModal() {
+    const modal = showModal('Creeaza cont nou', `
+        <input type="text" id="signupUsername" placeholder="Username" required class="modal-input">
+        <input type="email" id="signupEmail" placeholder="Email" required class="modal-input">
+        <input type="password" id="signupPassword" placeholder="Parola" required class="modal-input">
+        <button id="signupSubmit" class="modal-submit">Inregistreaza-te</button>
+    `);
+
+    document.getElementById('signupSubmit').addEventListener('click', async () => {
+        const username = document.getElementById('signupUsername').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        if (username && email && password) {
+            await signup(username, email, password);
+            closeModal(modal);
+            updateUIForAuthStatus();
+        }
+    });
 }
 
 function createNightModeToggle() {
