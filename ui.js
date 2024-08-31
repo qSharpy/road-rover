@@ -96,7 +96,7 @@ export async function updateProfileModalContent() {
 
     profileContent.innerHTML = `
         <div class="profile-header">
-            <img id="profilePhoto" src="${currentUser.photoUrl || 'default-profile.jpeg'}" alt="Profile">
+            <img id="profilePhoto" src="/api/profile-photo/${currentUser.username}" alt="Profile" onerror="this.src='default-profile.jpeg';">
             <h2>${stats.username}</h2>
         </div>
         <div class="profile-stats">
@@ -122,6 +122,7 @@ export async function updateProfileModalContent() {
     `;
 
     document.getElementById('saveProfile').addEventListener('click', handleSaveProfile);
+    document.getElementById('photoUpload').addEventListener('change', handlePhotoUpload);
 }
 
 function handleSaveProfile() {
@@ -137,4 +138,16 @@ function handleSaveProfile() {
     if (password) formData.append('password', password);
 
     saveProfileChanges(formData);
+}
+
+
+function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profilePhoto').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 }

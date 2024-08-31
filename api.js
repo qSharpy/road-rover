@@ -172,6 +172,15 @@ export async function saveProfileChanges(formData) {
         if (response.ok) {
             const result = await response.json();
             alert(result.message || 'Profile updated successfully');
+
+            // Update the current user object with new data
+            const updatedUser = {
+                ...currentUser,
+                email: formData.get('email') || currentUser.email
+            };
+            setCurrentUser(updatedUser);
+
+            // Refresh the profile modal content
             updateProfileModalContent();
         } else {
             const errorData = await response.json();

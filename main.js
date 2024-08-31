@@ -14,4 +14,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(setupAuthEventListeners, 0);
 });
 
-export const FRONTEND_VERSION = "0.114 native UI";
+export const FRONTEND_VERSION = "0.115 native UI";
