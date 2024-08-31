@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.107 toggleTracking";
+const FRONTEND_VERSION = "0.109 night map inversion";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -13,8 +13,9 @@ const dayTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner/{z
     attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> <a href="https://stamen.com/" target="_blank">&copy; Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
 });
 
-const nightTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles © Esri & contributors'
+const nightTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> <a href="https://stamen.com/" target="_blank">&copy; Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+    className: 'night-tiles'
 });
 
 // Add the day tiles as the default
@@ -54,6 +55,7 @@ nightModeButton.addEventListener('click', () => {
         toggleButton.style.backgroundColor = 'white';
         toggleButton.style.color = 'black';
         nightModeButton.textContent = 'Mod Noapte';
+        mapContainer.classList.remove('night-mode');  // Remove night-mode class
 
         // Update burger menu options for day mode
         menuOptions.style.backgroundColor = 'white';
@@ -74,6 +76,7 @@ nightModeButton.addEventListener('click', () => {
         toggleButton.style.backgroundColor = '#424242';
         toggleButton.style.color = 'white';
         nightModeButton.textContent = 'Mod Zi';
+        mapContainer.classList.add('night-mode');  // Add night-mode class
 
         // Update burger menu options for night mode
         menuOptions.style.backgroundColor = '#424242';
@@ -926,3 +929,16 @@ recalculateButton.addEventListener('click', recalculatePotholes);
 
 // Add the button to the map container
 mapContainer.appendChild(recalculateButton);
+// Add CSS for night mode
+const nightModeCSS = `
+    .night-tiles.leaflet-layer,
+    .night-mode .leaflet-control-zoom-in,
+    .night-mode .leaflet-control-zoom-out,
+    .night-mode .leaflet-control-attribution {
+        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    }
+`;
+
+const styleElement = document.createElement('style');
+styleElement.textContent = nightModeCSS;
+document.head.appendChild(styleElement);
