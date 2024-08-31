@@ -259,4 +259,9 @@ body {
         height: 30px;
         font-size: 16px;
     }
+
+    /* Add this new rule to adjust the position on mobile devices */
+    #controls {
+        bottom: 80px; /* Increase this value to move the buttons higher */
+    }
 }
