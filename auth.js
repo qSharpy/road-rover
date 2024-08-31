@@ -1,5 +1,7 @@
 import { showModal, closeModal, showProfileModal, showLeaderboardModal } from './ui.js';
 
+let currentUser = null;
+
 export function getCurrentUser() {
     if (!currentUser) {
         const userString = localStorage.getItem('currentUser');
@@ -31,9 +33,9 @@ export function setupAuthEventListeners() {
     }
 
     // Check if user is already logged in
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-        updateUIForUser(currentUser);
+    const user = getCurrentUser();
+    if (user) {
+        updateUIForUser(user);
     }
 }
 

@@ -13,8 +13,13 @@ export async function login(email, password) {
         });
         const data = await response.json();
         if (response.ok) {
-            setCurrentUser(data);
+            const user = {
+                username: data.username,
+                email: email
+            };
+            setCurrentUser(user);
             updateProfileModalContent();
+            alert('Login successful!');
         } else {
             alert(data.detail || 'Login failed');
         }
