@@ -2,6 +2,7 @@ import { toggleNightMode } from './map.js';
 import { getCurrentUser } from './auth.js';
 import { fetchLeaderboard, fetchUserStats, saveProfileChanges } from './api.js';
 import { API_BASE_URL } from './config.js';
+import { FRONTEND_VERSION } from './config.js';
 
 export function initializeUI() {
     createNightModeToggle();

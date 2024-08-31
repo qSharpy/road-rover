@@ -13,5 +13,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Delay setup of auth event listeners to ensure DOM elements are created
     setTimeout(setupAuthEventListeners, 0);
 });
-
-export const FRONTEND_VERSION = "0.116 native UI";
