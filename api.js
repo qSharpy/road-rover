@@ -89,9 +89,17 @@ export async function fetchAndDisplayPotholes() {
     try {
         const response = await fetch(`${API_BASE_URL}/potholes`);
         const data = await response.json();
-        // Process and display potholes on the map
-        // This part depends on your map implementation
-        // You might want to call a function from map.js here to display the potholes
+
+        // Prepare data for heatmap
+        const heatmapData = data.map(pothole => {
+            const lat = pothole.coordinates[1];
+            const lon = pothole.coordinates[0];
+            const intensity = pothole.severity === 'large' ? 1 : pothole.severity === 'medium' ? 0.5 : 0.2;
+            return [lat, lon, intensity];
+        });
+
+        // Call the function to display the heatmap
+        displayPotholeHeatmap(heatmapData);
     } catch (error) {
         console.error('Error fetching pothole data:', error);
     }

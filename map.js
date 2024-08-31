@@ -1,6 +1,7 @@
 import { fetchAndDisplayPotholes } from './api.js';
 
 let map, dayTiles, nightTiles, isNightMode = false;
+let currentHeatmapLayer;
 
 export function initializeMap() {
     const mapContainer = document.getElementById('map');
@@ -22,7 +23,37 @@ export function initializeMap() {
 
     dayTiles.addTo(map);
 
-    fetchAndDisplayPotholes();
+    // Load the heatmap plugin
+    loadHeatmapPlugin().then(() => {
+        fetchAndDisplayPotholes();
+    });
+}
+
+function loadHeatmapPlugin() {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+export function displayPotholeHeatmap(heatmapData) {
+    if (currentHeatmapLayer) {
+        map.removeLayer(currentHeatmapLayer);
+    }
+
+    currentHeatmapLayer = L.heatLayer(heatmapData, {
+        radius: 15,
+        maxZoom: 15,
+        blur: 10,
+        gradient: {
+            0.2: 'yellow',
+            0.5: 'orange',
+            1.0: 'red'
+        }
+    }).addTo(map);
 }
 
 export function toggleNightMode() {
