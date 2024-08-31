@@ -1,5 +1,4 @@
 import { showModal, closeModal, showProfileModal, showLeaderboardModal } from './ui.js';
-import { login, signup, logout } from './api.js';
 
 export function getCurrentUser() {
     const userString = localStorage.getItem('currentUser');
@@ -41,10 +40,11 @@ function showLoginModal() {
         <button id="loginSubmit" class="modal-submit">Conecteaza-te</button>
     `);
 
-    document.getElementById('loginSubmit').addEventListener('click', () => {
+    document.getElementById('loginSubmit').addEventListener('click', async () => {
         const username = document.getElementById('loginUsername').value;
         const password = document.getElementById('loginPassword').value;
         if (username && password) {
+            const { login } = await import('./api.js');
             login(username, password);
             closeModal(modal);
         }
@@ -59,11 +59,12 @@ function showSignupModal() {
         <button id="signupSubmit" class="modal-submit">Inregistreaza-te</button>
     `);
 
-    document.getElementById('signupSubmit').addEventListener('click', () => {
+    document.getElementById('signupSubmit').addEventListener('click', async () => {
         const username = document.getElementById('signupUsername').value;
         const email = document.getElementById('signupEmail').value;
         const password = document.getElementById('signupPassword').value;
         if (username && email && password) {
+            const { signup } = await import('./api.js');
             signup(username, email, password);
             closeModal(modal);
         }
@@ -92,8 +93,8 @@ function updateUIForUser(user) {
     }
 }
 
-export function handleLogout() {
-    logout().then(() => {
-        setCurrentUser(null);
-    });
+export async function handleLogout() {
+    const { logout } = await import('./api.js');
+    await logout();
+    updateUIForUser(null);
 }

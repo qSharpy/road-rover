@@ -1,4 +1,4 @@
-import { updateCurrentUser } from './auth.js';
+import { getCurrentUser, setCurrentUser } from './auth.js';
 import { centerMapOnUser } from './map.js';
 import { updateProfileModalContent } from './ui.js';
 
@@ -45,15 +45,38 @@ export async function signup(username, email, password) {
 
 export async function logout() {
     try {
-        // If you have a logout endpoint on your server, you can call it here
-        // const response = await fetch(`${API_BASE_URL}/logout`, { method: 'POST' });
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+            console.log('No user is currently logged in');
+            return;
+        }
 
+        // If you have a logout endpoint on your server, uncomment and use this:
+        // const response = await fetch(`${API_BASE_URL}/logout`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Authorization': `Bearer ${currentUser.token}` // If you're using token-based auth
+        //     }
+        // });
+
+        // if (!response.ok) {
+        //     throw new Error('Server-side logout failed');
+        // }
+
+        // Clear the user data from local storage
         setCurrentUser(null);
 
+        // Clear any auth tokens or session data
+        localStorage.removeItem('authToken'); // If you're using token-based auth
+
         console.log('User logged out successfully');
+
+        // Optionally, redirect to the home page or login page
+        // window.location.href = '/login.html';
     } catch (error) {
         console.error('Logout error:', error);
-        alert('An error occurred during logout');
+        alert('An error occurred during logout. Please try again.');
     }
 }
 
