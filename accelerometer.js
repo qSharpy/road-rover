@@ -1,5 +1,6 @@
 import { postAccelerometerData } from './api.js';
 import { getCurrentUser } from './auth.js';
+import { getAveragedLocation } from './map.js';
 
 let collecting = false;
 let accelerometerData = [];
@@ -49,11 +50,12 @@ function handleMotion(event) {
     const { x, y, z } = event.accelerationIncludingGravity;
     const timestamp = new Date().toISOString();
     const currentUser = getCurrentUser();
+    const averagedLocation = getAveragedLocation();
 
     accelerometerData.push({
         timestamp,
         acceleration: [x, y, z],
-        coordinates: currentUser ? [currentUser.lat, currentUser.lon] : null
+        coordinates: averagedLocation ? [averagedLocation.lat, averagedLocation.lng] : null
     });
 
     const currentTime = Date.now();

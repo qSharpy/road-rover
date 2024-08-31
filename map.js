@@ -1,7 +1,11 @@
 import { fetchAndDisplayPotholes } from './api.js';
+import { getCurrentUser } from './auth.js';
 
 let map, dayTiles, nightTiles, isNightMode = false;
 let currentHeatmapLayer;
+let locationMarker = null;
+let gpsBuffer = [];
+let isFollowingUser = false;
 
 export function initializeMap() {
     const mapContainer = document.getElementById('map');
@@ -23,12 +27,89 @@ export function initializeMap() {
 
     dayTiles.addTo(map);
 
-    // Load the heatmap plugin and then fetch and display potholes
     loadHeatmapPlugin().then(() => {
         fetchAndDisplayPotholes().then(heatmapData => {
             displayPotholeHeatmap(heatmapData);
         });
     });
+
+    createTrackingButton();
+    startLocationTracking();
+}
+
+function createTrackingButton() {
+    const trackingButton = document.createElement('button');
+    trackingButton.textContent = 'Urmareste';
+    trackingButton.classList.add('control-button');
+    trackingButton.style.backgroundColor = '#ADD8E6'; // Light blue
+    trackingButton.addEventListener('click', toggleTracking);
+
+    const controlsContainer = document.getElementById('controls');
+    controlsContainer.insertBefore(trackingButton, controlsContainer.firstChild);
+}
+
+function toggleTracking() {
+    isFollowingUser = !isFollowingUser;
+    const trackingButton = document.querySelector('.control-button');
+    if (isFollowingUser) {
+        trackingButton.style.backgroundColor = '#FFB6C1'; // Light red
+        trackingButton.textContent = 'Urmareste (Activ)';
+        if (locationMarker) {
+            map.setView(locationMarker.getLatLng(), 16);
+        }
+    } else {
+        trackingButton.style.backgroundColor = '#ADD8E6'; // Light blue
+        trackingButton.textContent = 'Urmareste';
+    }
+}
+
+function startLocationTracking() {
+    navigator.geolocation.watchPosition(updateLocation, handleLocationError, {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 10000
+    });
+}
+
+function updateLocation(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    gpsBuffer.push([lat, lon]);
+    if (gpsBuffer.length > 5) {
+        gpsBuffer.shift();
+    }
+
+    const averageLat = gpsBuffer.reduce((sum, coord) => sum + coord[0], 0) / gpsBuffer.length;
+    const averageLon = gpsBuffer.reduce((sum, coord) => sum + coord[1], 0) / gpsBuffer.length;
+    const averagedLocation = [averageLat, averageLon];
+
+    if (locationMarker) {
+        locationMarker.setLatLng(averagedLocation);
+    } else {
+        locationMarker = L.marker(averagedLocation).addTo(map)
+            .bindPopup('Your Location')
+            .openPopup();
+    }
+
+    if (isFollowingUser) {
+        map.setView(averagedLocation, 16);
+    }
+
+    // Update the current user's location
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+        currentUser.lat = averageLat;
+        currentUser.lon = averageLon;
+    }
+}
+
+function handleLocationError(error) {
+    console.error("Error getting location:", error);
+}
+
+export function getAveragedLocation() {
+    return locationMarker ? locationMarker.getLatLng() : null;
 }
 
 function loadHeatmapPlugin() {
