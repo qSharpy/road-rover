@@ -1,11 +1,15 @@
 import { showModal, closeModal, showProfileModal, showLeaderboardModal } from './ui.js';
 
 export function getCurrentUser() {
-    const userString = localStorage.getItem('currentUser');
-    return userString ? JSON.parse(userString) : null;
+    if (!currentUser) {
+        const userString = localStorage.getItem('currentUser');
+        currentUser = userString ? JSON.parse(userString) : null;
+    }
+    return currentUser;
 }
 
 export function setCurrentUser(user) {
+    currentUser = user;
     if (user) {
         localStorage.setItem('currentUser', JSON.stringify(user));
     } else {

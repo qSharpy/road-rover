@@ -1,5 +1,5 @@
 import { postAccelerometerData } from './api.js';
-import { currentUser } from './auth.js';
+import { getCurrentUser } from './auth.js';
 
 let collecting = false;
 let accelerometerData = [];
@@ -48,6 +48,7 @@ function toggleAccelerometer() {
 function handleMotion(event) {
     const { x, y, z } = event.accelerationIncludingGravity;
     const timestamp = new Date().toISOString();
+    const currentUser = getCurrentUser();
 
     accelerometerData.push({
         timestamp,
