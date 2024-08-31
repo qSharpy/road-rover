@@ -1,5 +1,5 @@
 import { toggleNightMode } from './map.js';
-import { currentUser } from './auth.js';
+import { getCurrentUser } from './auth.js';
 import { fetchLeaderboard, fetchUserStats, saveProfileChanges } from './api.js';
 
 export function initializeUI() {
@@ -80,9 +80,15 @@ export function showProfileModal() {
 }
 
 export async function updateProfileModalContent() {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+        console.error('No user logged in');
+        return;
+    }
+
     const profileContent = document.getElementById('profile-content');
     const stats = await fetchUserStats(currentUser.username);
-    
+
     profileContent.innerHTML = `
         <div class="profile-header">
             <img id="profilePhoto" src="${currentUser.photoUrl || 'default-profile.jpeg'}" alt="Profile">
@@ -110,5 +116,20 @@ export async function updateProfileModalContent() {
         </div>
     `;
 
-    document.getElementById('saveProfile').addEventListener('click', saveProfileChanges);
+    document.getElementById('saveProfile').addEventListener('click', handleSaveProfile);
+}
+
+function handleSaveProfile() {
+    const photoUpload = document.getElementById('photoUpload');
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const formData = new FormData();
+    if (photoUpload.files.length > 0) {
+        formData.append('photo', photoUpload.files[0]);
+    }
+    if (email) formData.append('email', email);
+    if (password) formData.append('password', password);
+
+    saveProfileChanges(formData);
 }

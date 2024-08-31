@@ -13,7 +13,7 @@ export async function login(email, password) {
         });
         const data = await response.json();
         if (response.ok) {
-            updateCurrentUser(data);
+            setCurrentUser(data);
             updateProfileModalContent();
         } else {
             alert(data.detail || 'Login failed');
@@ -48,12 +48,7 @@ export async function logout() {
         // If you have a logout endpoint on your server, you can call it here
         // const response = await fetch(`${API_BASE_URL}/logout`, { method: 'POST' });
 
-        // Clear the current user data
-        updateCurrentUser(null);
-
-        // You might want to clear any stored tokens or session data here
-        // For example, if you're using localStorage:
-        // localStorage.removeItem('userToken');
+        setCurrentUser(null);
 
         console.log('User logged out successfully');
     } catch (error) {
@@ -133,8 +128,14 @@ export async function fetchUserStats(username) {
 }
 
 export async function saveProfileChanges(formData) {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+        alert('You must be logged in to update your profile');
+        return;
+    }
+
     try {
-        const response = await fetch(`${API_BASE_URL}/update-profile/${localStorage.getItem('username')}`, {
+        const response = await fetch(`${API_BASE_URL}/update-profile/${currentUser.username}`, {
             method: 'POST',
             body: formData
         });
