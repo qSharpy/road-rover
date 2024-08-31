@@ -23,9 +23,11 @@ export function initializeMap() {
 
     dayTiles.addTo(map);
 
-    // Load the heatmap plugin
+    // Load the heatmap plugin and then fetch and display potholes
     loadHeatmapPlugin().then(() => {
-        fetchAndDisplayPotholes();
+        fetchAndDisplayPotholes().then(heatmapData => {
+            displayPotholeHeatmap(heatmapData);
+        });
     });
 }
 
@@ -39,7 +41,7 @@ function loadHeatmapPlugin() {
     });
 }
 
-export function displayPotholeHeatmap(heatmapData) {
+function displayPotholeHeatmap(heatmapData) {
     if (currentHeatmapLayer) {
         map.removeLayer(currentHeatmapLayer);
     }

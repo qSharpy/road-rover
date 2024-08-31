@@ -98,10 +98,10 @@ export async function fetchAndDisplayPotholes() {
             return [lat, lon, intensity];
         });
 
-        // Call the function to display the heatmap
-        displayPotholeHeatmap(heatmapData);
+        return heatmapData;
     } catch (error) {
         console.error('Error fetching pothole data:', error);
+        return [];
     }
 }
 
