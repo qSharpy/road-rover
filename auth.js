@@ -4,8 +4,16 @@ import { login, signup, logout } from './api.js';
 export let currentUser = null;
 
 export function setupAuthEventListeners() {
-    document.getElementById('loginOption').addEventListener('click', showLoginModal);
-    document.getElementById('signupOption').addEventListener('click', showSignupModal);
+    const loginOption = document.getElementById('loginOption');
+    const signupOption = document.getElementById('signupOption');
+
+    if (loginOption) {
+        loginOption.addEventListener('click', showLoginModal);
+    }
+
+    if (signupOption) {
+        signupOption.addEventListener('click', showSignupModal);
+    }
 }
 
 function showLoginModal() {
@@ -46,4 +54,45 @@ function showSignupModal() {
 
 export function updateCurrentUser(user) {
     currentUser = user;
+    if (user) {
+        console.log('User logged in:', user);
+        updateUIForLoggedInUser();
+    } else {
+        console.log('User logged out');
+        updateUIForLoggedOutUser();
+    }
 }
+
+function updateUIForLoggedInUser() {
+    const menuOptions = document.getElementById('menu-options');
+    if (menuOptions) {
+        menuOptions.innerHTML = `
+            <div id="viewProfileOption">👤 Profile</div>
+            <div id="viewLeaderboardOption">🏆 Leaderboard</div>
+            <div id="logoutOption">⚠️ Logout</div>
+        `;
+        document.getElementById('viewProfileOption').addEventListener('click', showProfileModal);
+        document.getElementById('viewLeaderboardOption').addEventListener('click', showLeaderboardModal);
+        document.getElementById('logoutOption').addEventListener('click', handleLogout);
+    }
+}
+
+function updateUIForLoggedOutUser() {
+    const menuOptions = document.getElementById('menu-options');
+    if (menuOptions) {
+        menuOptions.innerHTML = `
+            <div id="loginOption">Login</div>
+            <div id="signupOption">Sign Up</div>
+        `;
+        setupAuthEventListeners();
+    }
+}
+
+export function handleLogout() {
+    logout().then(() => {
+        updateUIForLoggedOutUser();
+    });
+}
+
+// Import these functions from ui.js if they're not already in this file
+import { showProfileModal, showLeaderboardModal } from './ui.js';

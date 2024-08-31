@@ -6,10 +6,12 @@ import { displayBackendVersion } from './api.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeMap();
-    setupAuthEventListeners();
-    initializeAccelerometer();
     initializeUI();
+    initializeAccelerometer();
     displayBackendVersion();
+
+    // Delay setup of auth event listeners to ensure DOM elements are created
+    setTimeout(setupAuthEventListeners, 0);
 });
 
-export const FRONTEND_VERSION = "0.110 native UI";
+export const FRONTEND_VERSION = "0.111 native UI";
