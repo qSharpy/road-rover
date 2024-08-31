@@ -43,12 +43,32 @@ export async function signup(username, email, password) {
     }
 }
 
+export async function logout() {
+    try {
+        // If you have a logout endpoint on your server, you can call it here
+        // const response = await fetch(`${API_BASE_URL}/logout`, { method: 'POST' });
+
+        // Clear the current user data
+        updateCurrentUser(null);
+
+        // You might want to clear any stored tokens or session data here
+        // For example, if you're using localStorage:
+        // localStorage.removeItem('userToken');
+
+        console.log('User logged out successfully');
+    } catch (error) {
+        console.error('Logout error:', error);
+        alert('An error occurred during logout');
+    }
+}
+
 export async function fetchAndDisplayPotholes() {
     try {
         const response = await fetch(`${API_BASE_URL}/potholes`);
         const data = await response.json();
         // Process and display potholes on the map
         // This part depends on your map implementation
+        // You might want to call a function from map.js here to display the potholes
     } catch (error) {
         console.error('Error fetching pothole data:', error);
     }
@@ -60,7 +80,7 @@ export async function postAccelerometerData(data) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-User': currentUser ? currentUser.username : ''
+                'X-User': localStorage.getItem('username') || ''
             },
             body: JSON.stringify(data)
         });
@@ -114,7 +134,7 @@ export async function fetchUserStats(username) {
 
 export async function saveProfileChanges(formData) {
     try {
-        const response = await fetch(`${API_BASE_URL}/update-profile/${currentUser.username}`, {
+        const response = await fetch(`${API_BASE_URL}/update-profile/${localStorage.getItem('username')}`, {
             method: 'POST',
             body: formData
         });
