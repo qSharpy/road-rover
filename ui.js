@@ -80,13 +80,18 @@ export function showProfileModal() {
 }
 
 export async function updateProfileModalContent() {
+    const profileContent = document.getElementById('profile-content');
+    if (!profileContent) {
+        console.log('Profile modal is not open. Skipping update.');
+        return;
+    }
+
     const currentUser = getCurrentUser();
     if (!currentUser) {
         console.error('No user logged in');
         return;
     }
 
-    const profileContent = document.getElementById('profile-content');
     const stats = await fetchUserStats(currentUser.username);
 
     profileContent.innerHTML = `

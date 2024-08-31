@@ -18,8 +18,9 @@ export async function login(email, password) {
                 email: email
             };
             setCurrentUser(user);
-            updateProfileModalContent();
             alert('Login successful!');
+            showProfileModal(); // Open the profile modal
+            // updateProfileModalContent is called inside showProfileModal, so we don't need to call it here
         } else {
             alert(data.detail || 'Login failed');
         }
