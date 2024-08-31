@@ -54,7 +54,7 @@ function handleMotion(event) {
 
     accelerometerData.push({
         timestamp,
-        acceleration: { x, y, z },  // Changed to object format
+        acceleration: [x, y, z],  // Changed to array format
         coordinates: averagedLocation ? [averagedLocation.lng, averagedLocation.lat] : null  // Note the order: [longitude, latitude]
     });
 

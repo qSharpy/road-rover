@@ -107,11 +107,17 @@ export async function fetchAndDisplayPotholes() {
 
 export async function postAccelerometerData(data) {
     try {
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+            console.log("User not logged in. Data not sent.");
+            return;
+        }
+
         const response = await fetch(`${API_BASE_URL}/accelerometer-data`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-User': localStorage.getItem('username') || ''
+                'X-User': currentUser.username || ''
             },
             body: JSON.stringify(data)
         });
