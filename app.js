@@ -1,4 +1,4 @@
-const FRONTEND_VERSION = "0.106 fix modal loading twice";
+const FRONTEND_VERSION = "0.107 toggleTracking";
 
 // Initialize the map container and set its height
 const mapContainer = document.getElementById('map');
@@ -51,8 +51,6 @@ nightModeButton.addEventListener('click', () => {
         versionElement.style.color = 'black';
         nightModeButton.style.backgroundColor = 'white';
         nightModeButton.style.color = 'black';
-        reCenterButton.style.backgroundColor = 'white';
-        reCenterButton.style.color = 'black';
         toggleButton.style.backgroundColor = 'white';
         toggleButton.style.color = 'black';
         nightModeButton.textContent = 'Mod Noapte';
@@ -73,8 +71,6 @@ nightModeButton.addEventListener('click', () => {
         versionElement.style.color = 'white';
         nightModeButton.style.backgroundColor = '#424242';
         nightModeButton.style.color = 'white';
-        reCenterButton.style.backgroundColor = '#424242';
-        reCenterButton.style.color = 'white';
         toggleButton.style.backgroundColor = '#424242';
         toggleButton.style.color = 'white';
         nightModeButton.textContent = 'Mod Zi';
@@ -90,25 +86,37 @@ nightModeButton.addEventListener('click', () => {
     isNightMode = !isNightMode;
 });
 
-// Add the "Re-center" button to the map
-const reCenterButton = document.createElement('button');
-reCenterButton.style.position = 'absolute';
-reCenterButton.style.bottom = '50px';
-reCenterButton.style.right = '10px';
-reCenterButton.style.padding = '5px 10px';
-reCenterButton.style.zIndex = '1000'; // Ensure the button is on top
-reCenterButton.textContent = 'Re-centrare';
-reCenterButton.addEventListener('click', () => {
-    shouldReCenter = true;
-    userHasMovedMap = false;
-    if (locationMarker) {
-        map.setView(locationMarker.getLatLng(), 16);
+const trackingButton = document.createElement('button');
+trackingButton.style.position = 'absolute';
+trackingButton.style.bottom = '50px';
+trackingButton.style.right = '10px';
+trackingButton.style.padding = '5px 10px';
+trackingButton.style.zIndex = '1000';
+trackingButton.textContent = 'Urmareste';
+trackingButton.style.backgroundColor = '#ADD8E6'; // Light blue
+trackingButton.style.border = 'none';
+trackingButton.style.borderRadius = '5px';
+trackingButton.style.cursor = 'pointer';
+trackingButton.addEventListener('click', toggleTracking);
+
+// Add this function to handle the tracking toggle
+function toggleTracking() {
+    isFollowingUser = !isFollowingUser;
+    if (isFollowingUser) {
+        trackingButton.style.backgroundColor = '#FFB6C1'; // Light red
+        trackingButton.textContent = 'Urmareste (Activ)';
+        if (locationMarker) {
+            map.setView(locationMarker.getLatLng(), 16);
+        }
+    } else {
+        trackingButton.style.backgroundColor = '#ADD8E6'; // Light blue
+        trackingButton.textContent = 'Urmareste';
     }
-});
+}
 
 // Append the buttons to the map container
 mapContainer.appendChild(nightModeButton);
-mapContainer.appendChild(reCenterButton);
+mapContainer.appendChild(trackingButton);
 
 // Function to fetch and display backend version
 async function displayBackendVersion() {
@@ -125,8 +133,8 @@ async function displayBackendVersion() {
 displayBackendVersion();
 
 // Variables to track centering
-let shouldReCenter = true;
 let userHasMovedMap = false;
+let isFollowingUser = false;
 
 // Marker for averaged location
 let locationMarker = null;
@@ -170,7 +178,7 @@ navigator.geolocation.watchPosition(function(position) {
     }
 
     // Re-center the map if allowed and if the user hasn't moved the map manually
-    if (shouldReCenter && !userHasMovedMap) {
+    if (isFollowingUser) {
         map.setView(averagedLocation, 16);
     }
 
