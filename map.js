@@ -42,8 +42,11 @@ function setInitialMapView() {
     if (locationMarker) {
         map.setView(locationMarker.getLatLng(), 16);
     } else {
-        // If locationMarker is not available, use a default location (e.g., center of Bucharest)
-        map.setView([44.4268, 26.1025], 16);
+        // If locationMarker is not available, use a default location
+        map.fitBounds([
+            [48.2, 20.2], // Northeast corner of Romania
+            [43.6, 29.7]  // Southwest corner of Romania
+        ]);
     }
 }
 
