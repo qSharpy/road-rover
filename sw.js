@@ -1,4 +1,4 @@
-const CACHE_NAME = '0.164';
+const CACHE_NAME = '0.165';
 const SCOPE = '/road-rover/';
 
 const ASSETS_TO_CACHE = [

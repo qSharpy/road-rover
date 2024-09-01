@@ -83,9 +83,9 @@ function startLocationTracking() {
 
 const locationIcon = L.divIcon({
     className: 'custom-location-icon',
-    html: '<i class="far fa-circle"></i>', // Use "far" for regular style
-    iconSize: [24, 24], // Adjust size as needed
-    iconAnchor: [12, 12] // Center the icon
+    html: '<i class="far fa-circle" style="color: green;"></i>',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14] // Center the icon, half the size
 });
 
 function updateLocation(position) {
