@@ -81,6 +81,13 @@ function startLocationTracking() {
     });
 }
 
+const locationIcon = L.divIcon({
+    className: 'custom-location-icon',
+    html: '<i class="fa-regular fa-circle"></i>',
+    iconSize: [24, 24], // Adjust size as needed
+    iconAnchor: [12, 12] // Center the icon
+});
+
 function updateLocation(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
@@ -97,7 +104,7 @@ function updateLocation(position) {
     if (locationMarker) {
         locationMarker.setLatLng(averagedLocation);
     } else {
-        locationMarker = L.marker(averagedLocation).addTo(map);
+        locationMarker = L.marker(averagedLocation, { icon: locationIcon }).addTo(map);
         setInitialMapView();
     }
 
