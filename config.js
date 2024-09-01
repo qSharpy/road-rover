@@ -1,2 +1,2 @@
 export const API_BASE_URL = 'https://road-rover.gris.ninja/api';
-export const FRONTEND_VERSION = "0.137 styling";
+export const FRONTEND_VERSION = "0.138 styling";
