@@ -265,3 +265,22 @@ body {
         bottom: 80px;
     }
 }
+
+.tracking-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: white;
+    padding: 10px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.tracking-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tracking-button.active {
+    color: red;
+}

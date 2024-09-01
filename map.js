@@ -39,9 +39,8 @@ export function initializeMap() {
 
 function createTrackingButton() {
     const trackingButton = document.createElement('button');
-    trackingButton.textContent = 'Urmareste';
-    trackingButton.classList.add('control-button');
-    trackingButton.style.backgroundColor = '#ADD8E6'; // Light blue
+    trackingButton.innerHTML = '<i class="fas fa-crosshairs"></i>'; // Font Awesome crosshairs icon
+    trackingButton.classList.add('control-button', 'tracking-button');
     trackingButton.addEventListener('click', toggleTracking);
 
     const controlsContainer = document.getElementById('controls');
@@ -50,16 +49,14 @@ function createTrackingButton() {
 
 function toggleTracking() {
     isFollowingUser = !isFollowingUser;
-    const trackingButton = document.querySelector('.control-button');
+    const trackingButton = document.querySelector('.tracking-button');
     if (isFollowingUser) {
-        trackingButton.style.backgroundColor = '#FFB6C1'; // Light red
-        trackingButton.textContent = 'Urmareste (Activ)';
+        trackingButton.classList.add('active');
         if (locationMarker) {
             map.setView(locationMarker.getLatLng(), 16);
         }
     } else {
-        trackingButton.style.backgroundColor = '#ADD8E6'; // Light blue
-        trackingButton.textContent = 'Urmareste';
+        trackingButton.classList.remove('active');
     }
 }
 
