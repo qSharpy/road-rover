@@ -123,10 +123,26 @@ export async function postAccelerometerData(data) {
         const result = await response.json();
         if (result.potholes_detected > 0) {
             fetchAndDisplayPotholes();
+            
+            // Play sound based on pothole severity
+            if (result.pothole_severity) {
+                playPotholeSound(result.pothole_severity);
+            }
         }
     } catch (error) {
         console.error("Error posting accelerometer data:", error);
     }
+}
+
+function playPotholeSound(severity) {
+    const soundMap = {
+        small: 'small_pothole.mp3',
+        medium: 'medium_pothole.mp3',
+        large: 'large_pothole.mp3'
+    };
+
+    const sound = new Audio(`.sounds/${soundMap[severity]}`);
+    sound.play().catch(error => console.error('Error playing sound:', error));
 }
 
 export async function fetchLeaderboard() {
