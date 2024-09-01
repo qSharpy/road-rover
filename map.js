@@ -15,7 +15,7 @@ export function initializeMap() {
     mapContainer.style.top = '0';
     mapContainer.style.left = '0';
 
-    map = L.map('map');
+    map = L.map('map', { zoomControl: false });
 
     dayTiles = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> <a href="https://stamen.com/" target="_blank">&copy; Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
