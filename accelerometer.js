@@ -18,7 +18,6 @@ function toggleAccelerometer() {
 
     if (collecting) {
         console.log("Starting accelerometer data collection");
-        toggleButton.textContent = 'Stop Accelerometer';
         toggleButton.classList.add('active');
         
         if (typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -40,7 +39,6 @@ function toggleAccelerometer() {
         }
     } else {
         console.log("Stopping accelerometer data collection");
-        toggleButton.textContent = 'Start Accelerometer';
         toggleButton.classList.remove('active');
         window.removeEventListener('devicemotion', handleMotion, true);
     }
