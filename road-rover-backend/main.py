@@ -302,7 +302,7 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
 
     user_id = user.id
     global last_detection_time
-    logger.info(f"Received accelerometer data from user {x_user}: {data}")
+    #logger.info(f"Received accelerometer data from user {x_user}: {data}")
 
     min_interval = timedelta(seconds=1.5)
     current_time = datetime.utcnow()
@@ -363,10 +363,10 @@ async def process_accelerometer_data(data: List[AccelerometerData], db: AsyncSes
             logging.info(f"Potholes detected by user {x_user}: {potholes}")
 
         await db.commit()
-        logger.info("Accelerometer data processed and stored successfully")
+        #logger.info("Accelerometer data processed and stored successfully")
         return {"message": "Data processed successfully", "potholes_detected": len(potholes)}
     except Exception as e:
-        logger.error(f"Error processing accelerometer data: {str(e)}")
+        #logger.error(f"Error processing accelerometer data: {str(e)}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Error processing accelerometer data: {str(e)}")
 
@@ -466,4 +466,3 @@ async def recalculate_potholes(db: AsyncSession = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error recalculating potholes: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error recalculating potholes: {str(e)}")
-
