@@ -200,6 +200,8 @@ body {
 .night-mode .control-button,
 .night-mode #night-mode-toggle,
 .night-mode #menu-options,
+.night-mode #toggle-accelerometer,
+.night-mode #burger-menu,
 .night-mode .modal-content {
     background-color: #333;
     color: white;
