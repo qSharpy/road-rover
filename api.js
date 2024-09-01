@@ -1,5 +1,4 @@
 import { getCurrentUser, setCurrentUser } from './auth.js';
-import { centerMapOnUser } from './map.js';
 import { updateProfileModalContent, showProfileModal } from './ui.js';
 import { API_BASE_URL } from './config.js';
 

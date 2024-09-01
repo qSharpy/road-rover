@@ -157,8 +157,13 @@ body {
     color: var(--text-color);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+    transition: background-color 0.3s, color 0.3s;
 }
 
+#night-mode-toggle.night-mode {
+    background-color: #333;
+    color: #ffd700; /* Golden color for the sun */
+}
 #version-display {
     position: absolute;
     bottom: 10px;

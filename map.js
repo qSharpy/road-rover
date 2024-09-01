@@ -147,8 +147,17 @@ export function toggleNightMode() {
         dayTiles.addTo(map);
         document.body.classList.remove('night-mode');
     }
-}
 
-export function centerMapOnUser(lat, lon) {
-    map.setView([lat, lon], 16);
+    // Update the night mode toggle button
+    const nightModeButton = document.getElementById('night-mode-toggle');
+    const icon = nightModeButton.querySelector('i');
+    if (isNightMode) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        nightModeButton.classList.add('night-mode');
+    } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        nightModeButton.classList.remove('night-mode');
+    }
 }
