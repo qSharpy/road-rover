@@ -194,7 +194,7 @@ body {
 }
 
 .night-mode #map {
-    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    filter: invert(100%) brightness(95%) contrast(90%);
 }
 
 .night-mode .control-button,
