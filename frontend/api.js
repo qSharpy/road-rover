@@ -149,7 +149,7 @@ function playPotholeSound(severity) {
         return;
     }
 
-    const soundFile = `sounds/${soundMap[severity]}`;
+    const soundFile = `${soundMap[severity]}`;
     logToUI(`Attempting to load sound file: ${soundFile}`);
 
     const sound = new Audio(soundFile);
