@@ -123,7 +123,7 @@ export async function postAccelerometerData(data) {
             body: JSON.stringify(data)
         });
         const result = await response.json();
-        if (result.potholes_detected && result.potholes_detected.length > 0) {
+        if (result.potholes_detected > 0) {
             logToUI(`${result.potholes_detected.length} potholes detected`);
             fetchAndDisplayPotholes();
 
