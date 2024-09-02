@@ -123,16 +123,24 @@ export async function postAccelerometerData(data) {
             body: JSON.stringify(data)
         });
         const result = await response.json();
-        if (result.potholes_detected > 0) {
+        if (result.potholes_detected && result.potholes_detected.length > 0) {
+            logToUI(`${result.potholes_detected.length} potholes detected`);
             fetchAndDisplayPotholes();
 
-            // Play sound based on pothole severity
-            if (result.pothole_severity) {
-                playPotholeSound(result.pothole_severity);
-            }
+            // Play sound for each detected pothole
+            result.potholes_detected.forEach(pothole => {
+                if (pothole.severity) {
+                    logToUI(`Playing sound for ${pothole.severity} pothole`);
+                    playPotholeSound(pothole.severity);
+                } else {
+                    logToUI("Pothole detected but severity not specified", 'warn');
+                }
+            });
+        } else {
+            logToUI("No potholes detected");
         }
     } catch (error) {
-        console.error("Error posting accelerometer data:", error);
+        logToUI(`Error posting accelerometer data: ${error}`, 'error');
     }
 }
 
