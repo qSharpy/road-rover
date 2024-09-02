@@ -4,9 +4,11 @@ import { fetchLeaderboard, fetchUserStats, saveProfileChanges, login, signup } f
 import { API_BASE_URL } from './config.js';
 import { FRONTEND_VERSION } from './config.js';
 import { initializeUILogger, logToUI } from './ui-logger.js';
+import { checkFileExistence } from './file-checker.js';
 
 export function initializeUI() {
     initializeUILogger();
+    logToUI(`Supported audio types: ${JSON.stringify(getSupportedAudioTypes())}`, 'info');
     createNightModeToggle();
     createBurgerMenu();
     createVersionDisplay();
@@ -26,11 +28,22 @@ function createSoundInitButton() {
     controlsContainer.appendChild(soundInitButton);
 }
 
-function initializeSound() {
+async function initializeSound() {
     logToUI("Attempting to initialize sound...");
 
-    // Use a very short, silent MP3 file
-    const testAudio = new Audio('./sounds/small_pothole.mp3');
+    const testAudioFile = './sounds/small_pothole.mp3';
+
+    // Check if the file exists
+    const fileCheck = await checkFileExistence(testAudioFile);
+    if (!fileCheck.exists) {
+        logToUI(`Test audio file not found: ${testAudioFile}`, 'error');
+        logToUI(`File check result: ${JSON.stringify(fileCheck)}`, 'error');
+        return;
+    }
+
+    logToUI(`Test audio file found. Content-Type: ${fileCheck.contentType}`);
+
+    const testAudio = new Audio(testAudioFile);
 
     testAudio.oncanplaythrough = () => {
         logToUI("Audio can play through without buffering");
@@ -61,6 +74,7 @@ function initializeSound() {
                 break;
             case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
                 logToUI('Audio format not supported', 'error');
+                logToUI(`Supported audio types: ${JSON.stringify(getSupportedAudioTypes())}`, 'info');
                 break;
             default:
                 logToUI('Unknown error while loading audio', 'error');
@@ -68,6 +82,23 @@ function initializeSound() {
     };
 
     testAudio.load();
+}
+
+function getSupportedAudioTypes() {
+    const audioTest = document.createElement('audio');
+    const types = {
+        mp3: 'audio/mpeg',
+        ogg: 'audio/ogg',
+        wav: 'audio/wav',
+        aac: 'audio/aac',
+    };
+
+    const supported = {};
+    for (const [ext, mimeType] of Object.entries(types)) {
+        supported[ext] = audioTest.canPlayType(mimeType);
+    }
+
+    return supported;
 }
 
 function createAccelerometerButton() {
