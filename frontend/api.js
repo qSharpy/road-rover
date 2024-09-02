@@ -139,9 +139,9 @@ export async function postAccelerometerData(data) {
 function playPotholeSound(severity) {
     logToUI(`Attempting to play sound for ${severity} pothole`);
     const soundMap = {
-        small: 'small_pothole.mp3',
-        medium: 'medium_pothole.mp3',
-        large: 'large_pothole.mp3'
+        small: 'frontend/sounds/small_pothole.mp3',
+        medium: 'frontend/sounds/medium_pothole.mp3',
+        large: 'frontend/sounds/large_pothole.mp3'
     };
 
     if (!soundMap[severity]) {
@@ -149,7 +149,7 @@ function playPotholeSound(severity) {
         return;
     }
 
-    const soundFile = `${soundMap[severity]}`;
+    const soundFile = soundMap[severity];
     logToUI(`Attempting to load sound file: ${soundFile}`);
 
     const sound = new Audio(soundFile);

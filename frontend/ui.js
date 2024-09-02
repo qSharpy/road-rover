@@ -31,7 +31,7 @@ function createSoundInitButton() {
 async function initializeSound() {
     logToUI("Attempting to initialize sound...");
 
-    const testAudioFile = 'small_pothole.mp3';
+    const testAudioFile = 'frontend/sounds/small_pothole.mp3'; // Updated path
 
     // Check if the file exists
     const fileCheck = await checkFileExistence(testAudioFile);
