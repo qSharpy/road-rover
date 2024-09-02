@@ -1,6 +1,7 @@
 import { getCurrentUser, setCurrentUser } from './auth.js';
 import { updateProfileModalContent, showProfileModal } from './ui.js';
 import { API_BASE_URL } from './config.js';
+import { logToUI } from './ui-logger.js';
 
 export async function login(email, password) {
     try {
@@ -109,6 +110,7 @@ export async function postAccelerometerData(data) {
         const currentUser = getCurrentUser();
         if (!currentUser) {
             console.log("User not logged in. Data not sent.");
+            logToUI("User not logged in. Data not sent.");
             return;
         }
 
@@ -123,7 +125,7 @@ export async function postAccelerometerData(data) {
         const result = await response.json();
         if (result.potholes_detected > 0) {
             fetchAndDisplayPotholes();
-            
+
             // Play sound based on pothole severity
             if (result.pothole_severity) {
                 playPotholeSound(result.pothole_severity);
@@ -135,14 +137,25 @@ export async function postAccelerometerData(data) {
 }
 
 function playPotholeSound(severity) {
+    logToUI(`Attempting to play sound for ${severity} pothole`);
     const soundMap = {
         small: 'small_pothole.mp3',
         medium: 'medium_pothole.mp3',
         large: 'large_pothole.mp3'
     };
 
-    const sound = new Audio(`.sounds/${soundMap[severity]}`);
-    sound.play().catch(error => console.error('Error playing sound:', error));
+    if (!soundMap[severity]) {
+        logToUI(`Invalid severity: ${severity}`, 'error');
+        return;
+    }
+
+    const soundFile = `sounds/${soundMap[severity]}`;
+    logToUI(`Sound file path: ${soundFile}`);
+
+    const sound = new Audio(soundFile);
+    sound.play()
+        .then(() => logToUI(`Sound played successfully for ${severity} pothole`))
+        .catch(error => logToUI(`Error playing sound: ${error}`, 'error'));
 }
 
 export async function fetchLeaderboard() {

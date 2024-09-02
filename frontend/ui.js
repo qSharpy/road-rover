@@ -3,13 +3,39 @@ import { getCurrentUser, handleLogout, setCurrentUser } from './auth.js';
 import { fetchLeaderboard, fetchUserStats, saveProfileChanges, login, signup } from './api.js';
 import { API_BASE_URL } from './config.js';
 import { FRONTEND_VERSION } from './config.js';
+import { initializeUILogger, logToUI } from './ui-logger.js';
 
 export function initializeUI() {
+    initializeUILogger();
     createNightModeToggle();
     createBurgerMenu();
     createVersionDisplay();
     createAccelerometerButton();
+    createSoundInitButton();
     updateUIForAuthStatus();
+    logToUI('UI initialized successfully');
+}
+
+function createSoundInitButton() {
+    const controlsContainer = document.getElementById('controls');
+    const soundInitButton = document.createElement('button');
+    soundInitButton.id = 'init-sound';
+    soundInitButton.textContent = 'Initialize Sound';
+    soundInitButton.classList.add('control-button');
+    soundInitButton.addEventListener('click', initializeSound);
+    controlsContainer.appendChild(soundInitButton);
+}
+
+function initializeSound() {
+    logToUI("Initializing sound...");
+    // Create and play a silent audio to initialize audio context
+    const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABGgBjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2M=");
+    silentAudio.play().then(() => {
+        logToUI("Sound initialized successfully");
+        document.getElementById('init-sound').style.display = 'none';
+    }).catch(error => {
+        logToUI(`Error initializing sound: ${error}`, 'error');
+    });
 }
 
 function createAccelerometerButton() {
