@@ -150,12 +150,43 @@ function playPotholeSound(severity) {
     }
 
     const soundFile = `sounds/${soundMap[severity]}`;
-    logToUI(`Sound file path: ${soundFile}`);
+    logToUI(`Attempting to load sound file: ${soundFile}`);
 
     const sound = new Audio(soundFile);
-    sound.play()
-        .then(() => logToUI(`Sound played successfully for ${severity} pothole`))
-        .catch(error => logToUI(`Error playing sound: ${error}`, 'error'));
+
+    sound.oncanplaythrough = () => {
+        logToUI(`Sound file loaded successfully: ${soundFile}`);
+        sound.play()
+            .then(() => logToUI(`Sound played successfully for ${severity} pothole`))
+            .catch(error => {
+                logToUI(`Error playing sound: ${error.name}: ${error.message}`, 'error');
+                if (error.name === 'NotAllowedError') {
+                    logToUI("Autoplay prevented. User interaction may be required.", 'warn');
+                }
+            });
+    };
+
+    sound.onerror = (event) => {
+        logToUI(`Error loading sound file: ${event.target.error.code}`, 'error');
+        switch (event.target.error.code) {
+            case MediaError.MEDIA_ERR_ABORTED:
+                logToUI('Sound loading aborted', 'error');
+                break;
+            case MediaError.MEDIA_ERR_NETWORK:
+                logToUI('Network error while loading sound', 'error');
+                break;
+            case MediaError.MEDIA_ERR_DECODE:
+                logToUI('Sound decoding error', 'error');
+                break;
+            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                logToUI('Sound format not supported', 'error');
+                break;
+            default:
+                logToUI('Unknown error while loading sound', 'error');
+        }
+    };
+
+    sound.load();
 }
 
 export async function fetchLeaderboard() {

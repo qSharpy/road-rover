@@ -27,15 +27,47 @@ function createSoundInitButton() {
 }
 
 function initializeSound() {
-    logToUI("Initializing sound...");
-    // Create and play a silent audio to initialize audio context
-    const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABGgBjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2M=");
-    silentAudio.play().then(() => {
-        logToUI("Sound initialized successfully");
-        document.getElementById('init-sound').style.display = 'none';
-    }).catch(error => {
-        logToUI(`Error initializing sound: ${error}`, 'error');
-    });
+    logToUI("Attempting to initialize sound...");
+
+    // Use a very short, silent MP3 file
+    const testAudio = new Audio('./sounds/small_pothole.mp3');
+
+    testAudio.oncanplaythrough = () => {
+        logToUI("Audio can play through without buffering");
+        testAudio.play()
+            .then(() => {
+                logToUI("Sound initialized successfully");
+                document.getElementById('init-sound').style.display = 'none';
+            })
+            .catch(error => {
+                logToUI(`Error playing test sound: ${error.name}: ${error.message}`, 'error');
+                if (error.name === 'NotAllowedError') {
+                    logToUI("Autoplay prevented. User interaction required.", 'warn');
+                }
+            });
+    };
+
+    testAudio.onerror = (event) => {
+        logToUI(`Error loading audio: ${event.target.error.code}`, 'error');
+        switch (event.target.error.code) {
+            case MediaError.MEDIA_ERR_ABORTED:
+                logToUI('Audio loading aborted', 'error');
+                break;
+            case MediaError.MEDIA_ERR_NETWORK:
+                logToUI('Network error while loading audio', 'error');
+                break;
+            case MediaError.MEDIA_ERR_DECODE:
+                logToUI('Audio decoding error', 'error');
+                break;
+            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                logToUI('Audio format not supported', 'error');
+                break;
+            default:
+                logToUI('Unknown error while loading audio', 'error');
+        }
+    };
+
+    testAudio.load();
 }
 
 function createAccelerometerButton() {
